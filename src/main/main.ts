@@ -14,6 +14,19 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import { getTables } from './services/tables.service';
+import {
+  CLIENTS_GET,
+  MENU_GET_CATEGORIES,
+  MENU_GET_PRODUCTS_BY_CATEGORY,
+  OPEN_ROUTE,
+  TABLES_GET,
+  USERS_GET,
+} from './services/main-constants';
+import { openRoute } from './services/route.service';
+import { getUsers } from './services/users.service';
+import { getCategories, getProductsByCategory } from './services/menu.service';
+import { getClients } from './services/clients.service';
 
 class AppUpdater {
   constructor() {
@@ -127,6 +140,30 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(() => {
+    ipcMain.handle(TABLES_GET, async () => {
+      return getTables();
+    });
+    ipcMain.handle(USERS_GET, async () => {
+      return getUsers();
+    });
+    ipcMain.handle(MENU_GET_CATEGORIES, async () => {
+      return getCategories();
+    });
+    ipcMain.handle(
+      MENU_GET_PRODUCTS_BY_CATEGORY,
+      async (_, categoryId: number) => {
+        return getProductsByCategory(categoryId);
+      },
+    );
+    ipcMain.handle(CLIENTS_GET, async () => {
+      return getClients();
+    });
+
+    // Menu methods
+    ipcMain.on(OPEN_ROUTE, (_, route: string) => {
+      return openRoute(route);
+    });
+
     createWindow();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the

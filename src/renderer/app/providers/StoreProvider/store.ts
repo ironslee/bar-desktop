@@ -1,9 +1,19 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { loadingReducer } from '../../../components/Loader';
+import { tablesReducer } from '../../../components/Tables';
+import { usersReducer } from '../../../components/Users';
+import { menuReducer } from '../../../components/Menu';
+import { orderReducer } from '../../../components/Order';
+import { clientsReducer } from '../../../components/Clients';
 
 export const store = configureStore({
   reducer: {
     loadingStore: loadingReducer,
+    tablesStore: tablesReducer,
+    usersStore: usersReducer,
+    menuStore: menuReducer,
+    orderStore: orderReducer,
+    clientsStore: clientsReducer,
   },
 });
 
