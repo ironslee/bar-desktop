@@ -17,6 +17,7 @@ import { resolveHtmlPath } from './util';
 import { getTables } from './services/tables.service';
 import {
   CLIENTS_GET,
+  MENU_GET_ALL_PRODUCTS,
   MENU_GET_CATEGORIES,
   MENU_GET_PRODUCTS_BY_CATEGORY,
   OPEN_ROUTE,
@@ -25,7 +26,7 @@ import {
 } from './services/main-constants';
 import { openRoute } from './services/route.service';
 import { getUsers } from './services/users.service';
-import { getCategories, getProductsByCategory } from './services/menu.service';
+import { getAllProducts, getCategories, getProductsByCategory } from './services/menu.service';
 import { getClients } from './services/clients.service';
 
 class AppUpdater {
@@ -155,6 +156,9 @@ app
         return getProductsByCategory(categoryId);
       },
     );
+    ipcMain.handle(MENU_GET_ALL_PRODUCTS, async () => {
+      return getAllProducts();
+    });
     ipcMain.handle(CLIENTS_GET, async () => {
       return getClients();
     });

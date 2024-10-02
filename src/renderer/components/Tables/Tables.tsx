@@ -5,6 +5,8 @@ import { useAppSelector } from '../../hooks/useAppSelector';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { selectTable, setTables } from './Tables.slice';
 import { RootState } from '../../app/providers/StoreProvider';
+import { OrderItem } from '../../types/Order';
+import { addItemsFromTableOrder, clearOrder } from '../Order';
 
 interface TablesProps {
   onChangeModal: () => void;
@@ -13,8 +15,11 @@ interface TablesProps {
 
 const Tables = ({ onChangeModal, isTablesOpen }: TablesProps): JSX.Element => {
   const dispatch = useAppDispatch();
-  const { selectedTable } = useAppSelector(
+  const { selectedTable, tableOrders } = useAppSelector(
     (state: RootState) => state.tablesStore,
+  );
+  const { items, totalAmount } = useAppSelector(
+    (state: RootState) => state.orderStore,
   );
   const [tablesState, setTablesState] = useState<TableItem[]>([]);
 
@@ -34,8 +39,20 @@ const Tables = ({ onChangeModal, isTablesOpen }: TablesProps): JSX.Element => {
     }
   }, [isTablesOpen]);
 
+  useEffect(() => {
+    console.log('tableOrders from TableStore', tableOrders);
+  }, [tableOrders]);
+
   const handleSelectTable = (id: number) => {
+    const tableOrder = tableOrders.find((order) => order.tableId === id);
+    console.log('seltabOr', tableOrder);
     dispatch(selectTable(id));
+    if (tableOrder) {
+      dispatch(addItemsFromTableOrder(tableOrder.orderItems ?? []));
+    }
+    if (!tableOrder) {
+      dispatch(clearOrder());
+    }
     onChangeModal();
   };
 

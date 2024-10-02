@@ -1,14 +1,25 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TableItem, TableStatus } from '../../types/Table';
+import { OrderItem } from '../../types/Order';
+import { selectOrder } from '../Order';
+import { RootState } from '../../app/providers/StoreProvider';
+
+interface TableOrder {
+  tableId: number;
+  checkNumber?: number;
+  orderItems?: OrderItem[];
+}
 
 interface TablesState {
   tables: TableItem[];
   selectedTable: TableItem | null;
+  tableOrders: TableOrder[];
 }
 
 const initialState: TablesState = {
   tables: [],
   selectedTable: null,
+  tableOrders: [],
 };
 
 export const tablesSlice = createSlice({
@@ -18,13 +29,47 @@ export const tablesSlice = createSlice({
     setTables(state, action: PayloadAction<TableItem[]>) {
       state.tables = action.payload;
     },
+    // selectTable(state, action: PayloadAction<number>) {
+    //   const tableId = action.payload;
+    //   state.selectedTable =
+    //     state.tables.find((table) => table.id === tableId) || null;
+    // },
     selectTable(state, action: PayloadAction<number>) {
       const tableId = action.payload;
-      state.selectedTable =
-        state.tables.find((table) => table.id === tableId) || null;
+      const selectedTable = state.tables.find((table) => table.id === tableId);
+      const selectedTableOrder = state.tableOrders.find(
+        (table) => table.tableId === tableId,
+      );
+
+      if (selectedTable && !selectedTableOrder) {
+        // Генерация номера чека
+        const newOrderId = Math.floor(Math.random() * 1000);
+        state.tableOrders.push({
+          tableId: selectedTable.id,
+          checkNumber: newOrderId,
+        });
+      }
+
+      state.selectedTable = selectedTable || null;
+    },
+
+    syncTableOrder(
+      state,
+      action: PayloadAction<{ tableId: number; orderItems: OrderItem[] }>,
+    ) {
+      const { tableId, orderItems } = action.payload;
+
+      // Поиск заказа для стола
+      const tableOrder = state.tableOrders.find(
+        (order) => order.tableId === tableId,
+      );
+      // Привязка товаров из заказа к столу
+      if (tableOrder) {
+        tableOrder.orderItems = orderItems;
+      }
     },
   },
 });
 
-export const { setTables, selectTable } = tablesSlice.actions;
+export const { setTables, selectTable, syncTableOrder } = tablesSlice.actions;
 export default tablesSlice.reducer;

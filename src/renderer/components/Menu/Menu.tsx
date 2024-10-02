@@ -1,11 +1,12 @@
-import React, { useEffect } from 'react';
-import { Button, Card, Row, Col, message } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Button, Card, Row, Col, message, Input } from 'antd';
 import { setCategories, setProducts, selectCategory } from './Menu.slice';
 import { RootState } from '../../app/providers/StoreProvider';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import { ProductItem } from '../../types/Product';
 import { addItemToOrder } from '../Order';
+import useDebounce from '../../hooks/useDebounce';
 
 const Menu = (): JSX.Element => {
   const dispatch = useAppDispatch();
@@ -13,12 +14,18 @@ const Menu = (): JSX.Element => {
     (state: RootState) => state.menuStore,
   );
 
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [allProducts, setAllProducts] = useState<ProductItem[]>([]);
+  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+
   // Запрос категорий при загрузке
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         const fetchedCategories = await window.electron.getCategories();
+        const fetchedAllProducts = await window.electron.getAllProducts();
         dispatch(setCategories(fetchedCategories));
+        setAllProducts(fetchedAllProducts);
       } catch (error) {
         message.error('Не удалось загрузить категории');
       }
@@ -44,8 +51,20 @@ const Menu = (): JSX.Element => {
     dispatch(addItemToOrder(product));
   };
 
+  const filteredProducts = searchQuery
+    ? allProducts.filter((product) =>
+        product.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      )
+    : products;
+
   return (
-    <div>
+    <>
+      <Input
+        placeholder="Поиск по блюдам"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        style={{ marginBottom: '16px' }}
+      />
       <Row gutter={[16, 16]}>
         {categories.map((category) => (
           <Col key={category.id} span={6}>
@@ -64,7 +83,7 @@ const Menu = (): JSX.Element => {
       </Row>
 
       <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
-        {products.map((product) => (
+        {filteredProducts.map((product) => (
           <Col key={product.id} span={6}>
             <Card
               title={product.name}
@@ -76,7 +95,7 @@ const Menu = (): JSX.Element => {
           </Col>
         ))}
       </Row>
-    </div>
+    </>
   );
 };
 

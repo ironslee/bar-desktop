@@ -35,3 +35,20 @@ export const getProductsByCategory = (categoryId: number): ProductItem[] => {
 
   return products as ProductItem[];
 };
+
+export const getAllProducts = (): ProductItem[] => {
+  const db = connect();
+
+  const allProductsQuery = db.prepare(
+    `
+      SELECT id, name, vendorcodes, retprice, categoryId, link, statuses
+      FROM products;
+    `,
+  );
+
+  const allProducts = allProductsQuery.all();
+
+  db.close();
+
+  return allProducts as ProductItem[];
+};

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Row, Col, Card, Typography, Flex } from 'antd';
 import { DeleteOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { RootState } from '../../app/providers/StoreProvider';
@@ -12,6 +12,7 @@ import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import { colors } from '../../app/providers/ThemeProvider';
 import { Clients } from '../Clients';
+import { syncTableOrder } from '../Tables';
 
 const { Title } = Typography;
 
@@ -21,9 +22,24 @@ const Order = (): JSX.Element => {
   const { items, totalAmount } = useAppSelector(
     (state: RootState) => state.orderStore,
   );
+  const tableId = useAppSelector(
+    (state) => state.tablesStore.selectedTable?.id,
+  );
+  const orderItems = useAppSelector((state) => state.orderStore.items);
+
   const onChangeModal = () => {
     setIsOpen(!isOpen);
   };
+
+  useEffect(() => {
+    console.log('items from OrderStore', items);
+  }, [items]);
+
+  useEffect(() => {
+    if (tableId) {
+      dispatch(syncTableOrder({ tableId, orderItems }));
+    }
+  }, [tableId, orderItems, dispatch]);
 
   const handleAdd = (productId: number) => {
     const product = items.find(

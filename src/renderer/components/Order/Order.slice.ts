@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ProductItem } from '../../types/Product';
 import { OrderItem } from '../../types/Order';
+import { RootState } from '../../app/providers/StoreProvider';
 
 interface OrderState {
   items: OrderItem[];
@@ -73,14 +74,27 @@ export const orderSlice = createSlice({
       state.items = [];
       state.totalAmount = 0;
     },
+
+    addItemsFromTableOrder(state, action: PayloadAction<OrderItem[]>) {
+      state.items = action.payload;
+      state.totalAmount = action.payload.reduce(
+        (total, item) => total + item.totalPrice,
+        0,
+      );
+    },
   },
 });
+
+// Для получения состояния заказа
+export const selectOrder = (state: RootState) => state.orderStore.items;
 
 export const {
   addItemToOrder,
   removeItemFromOrder,
   deleteItemFromOrder,
   clearOrder,
+
+  addItemsFromTableOrder,
 } = orderSlice.actions;
 
 export default orderSlice.reducer;
