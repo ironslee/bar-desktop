@@ -13,8 +13,12 @@ const { Text } = Typography;
 const MainPage = () => {
   const [isTablesOpen, setIsTablesOpen] = useState(false);
   const [isUsersOpen, setIsUsersOpen] = useState(false);
-  const { selectedTable } = useAppSelector(
+  const { selectedTable, tableOrders } = useAppSelector(
     (state: RootState) => state.tablesStore,
+  );
+
+  const tableOrder = tableOrders.find(
+    (order) => order.tableId === selectedTable?.id,
   );
 
   const onChangeTablesModal = () => {
@@ -36,7 +40,7 @@ const MainPage = () => {
             />
             <Typography.Title
               level={4}
-            >{`Чек №23 стол ${selectedTable ? selectedTable.name : 'не выбран'}`}</Typography.Title>
+            >{`Чек ${tableOrder ? tableOrder.checkNumber : ''} стол ${selectedTable ? selectedTable.name : 'не выбран'}`}</Typography.Title>
           </Flex>
           <Flex>
             <Order />

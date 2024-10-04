@@ -13,6 +13,7 @@ import { useAppSelector } from '../../hooks/useAppSelector';
 import { colors } from '../../app/providers/ThemeProvider';
 import { Clients } from '../Clients';
 import { syncTableOrder } from '../Tables';
+import { Discount } from '../Discount';
 
 const { Title } = Typography;
 
@@ -22,10 +23,22 @@ const Order = (): JSX.Element => {
   const { items, totalAmount } = useAppSelector(
     (state: RootState) => state.orderStore,
   );
+  const { discount } = useAppSelector(
+    (state: RootState) => state.discountStore,
+  );
   const tableId = useAppSelector(
     (state) => state.tablesStore.selectedTable?.id,
   );
+  const orderClient = useAppSelector(
+    (state) => state.clientsStore.selectedClient,
+  );
+
   const orderItems = useAppSelector((state) => state.orderStore.items);
+
+  const [isDiscountOpen, setIsDiscountOpen] = useState(false);
+  const onChangeDiscountModal = () => {
+    setIsDiscountOpen(!isDiscountOpen);
+  };
 
   const onChangeModal = () => {
     setIsOpen(!isOpen);
@@ -37,9 +50,16 @@ const Order = (): JSX.Element => {
 
   useEffect(() => {
     if (tableId) {
-      dispatch(syncTableOrder({ tableId, orderItems }));
+      dispatch(
+        syncTableOrder({
+          tableId,
+          orderItems,
+          orderClient: orderClient || undefined,
+          orderDiscount: discount,
+        }),
+      );
     }
-  }, [tableId, orderItems, dispatch]);
+  }, [tableId, orderItems, dispatch, discount, orderClient]);
 
   const handleAdd = (productId: number) => {
     const product = items.find(
@@ -118,10 +138,17 @@ const Order = (): JSX.Element => {
 
         <Row justify="end" style={{ marginTop: '20px' }}>
           <Col>
-            <Title level={5}>К оплате: {totalAmount} тенге</Title>
+            <Title
+              level={5}
+            >{`К оплате: ${discount > 0 ? totalAmount - (totalAmount / 100) * discount : totalAmount} тенге`}</Title>
           </Col>
         </Row>
-
+        <Row>
+          <Discount
+            onChangeModal={onChangeDiscountModal}
+            isOpen={isDiscountOpen}
+          />
+        </Row>
         <Row justify="space-between" style={{ marginTop: '20px' }}>
           <Button type="default">Пред печать</Button>
           <Button type="primary">Оплатить</Button>

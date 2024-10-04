@@ -7,6 +7,8 @@ import { selectTable, setTables } from './Tables.slice';
 import { RootState } from '../../app/providers/StoreProvider';
 import { OrderItem } from '../../types/Order';
 import { addItemsFromTableOrder, clearOrder } from '../Order';
+import { addClientFromTableOrder, clearClient } from '../Clients';
+import { addDiscountFromTableOrder, clearDiscount } from '../Discount';
 
 interface TablesProps {
   onChangeModal: () => void;
@@ -49,9 +51,15 @@ const Tables = ({ onChangeModal, isTablesOpen }: TablesProps): JSX.Element => {
     dispatch(selectTable(id));
     if (tableOrder) {
       dispatch(addItemsFromTableOrder(tableOrder.orderItems ?? []));
+      if (tableOrder.orderClient) {
+        dispatch(addClientFromTableOrder(tableOrder.orderClient ?? null));
+      }
+      dispatch(addDiscountFromTableOrder(tableOrder.orderDiscount ?? 0));
     }
     if (!tableOrder) {
       dispatch(clearOrder());
+      dispatch(clearClient());
+      dispatch(clearDiscount());
     }
     onChangeModal();
   };

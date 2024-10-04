@@ -1,4 +1,16 @@
-import clientsReducer, { setClients, selectClient } from './Clients.slice';
+import clientsReducer, {
+  setClients,
+  selectClient,
+  clearClient,
+  addClientFromTableOrder,
+} from './Clients.slice';
 import Clients from './Clients';
 
-export { Clients, clientsReducer, setClients, selectClient };
+export {
+  Clients,
+  clientsReducer,
+  setClients,
+  selectClient,
+  clearClient,
+  addClientFromTableOrder,
+};

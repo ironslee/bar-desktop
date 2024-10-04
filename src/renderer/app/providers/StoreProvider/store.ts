@@ -5,6 +5,7 @@ import { usersReducer } from '../../../components/Users';
 import { menuReducer } from '../../../components/Menu';
 import { orderReducer } from '../../../components/Order';
 import { clientsReducer } from '../../../components/Clients';
+import { discountReducer } from '../../../components/Discount';
 
 export const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ export const store = configureStore({
     menuStore: menuReducer,
     orderStore: orderReducer,
     clientsStore: clientsReducer,
+    discountStore: discountReducer,
   },
 });
 

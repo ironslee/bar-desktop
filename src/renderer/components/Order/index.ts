@@ -4,7 +4,6 @@ import orderReducer, {
   deleteItemFromOrder,
   clearOrder,
   addItemsFromTableOrder,
-  selectOrder,
 } from './Order.slice';
 import Order from './Order';
 
@@ -16,5 +15,4 @@ export {
   deleteItemFromOrder,
   clearOrder,
   addItemsFromTableOrder,
-  selectOrder,
 };

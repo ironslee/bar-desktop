@@ -1,13 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TableItem, TableStatus } from '../../types/Table';
 import { OrderItem } from '../../types/Order';
-import { selectOrder } from '../Order';
-import { RootState } from '../../app/providers/StoreProvider';
+import { ClientItem } from '../../types/Client';
 
 interface TableOrder {
   tableId: number;
   checkNumber?: number;
   orderItems?: OrderItem[];
+  orderDiscount?: number;
+  orderClient?: ClientItem | null;
 }
 
 interface TablesState {
@@ -55,9 +56,15 @@ export const tablesSlice = createSlice({
 
     syncTableOrder(
       state,
-      action: PayloadAction<{ tableId: number; orderItems: OrderItem[] }>,
+      action: PayloadAction<{
+        tableId: number;
+        orderItems: OrderItem[];
+        orderClient?: ClientItem;
+        orderDiscount: number;
+      }>,
     ) {
-      const { tableId, orderItems } = action.payload;
+      const { tableId, orderItems, orderClient, orderDiscount } =
+        action.payload;
 
       // Поиск заказа для стола
       const tableOrder = state.tableOrders.find(
@@ -66,6 +73,8 @@ export const tablesSlice = createSlice({
       // Привязка товаров из заказа к столу
       if (tableOrder) {
         tableOrder.orderItems = orderItems;
+        tableOrder.orderDiscount = orderDiscount;
+        tableOrder.orderClient = orderClient;
       }
     },
   },

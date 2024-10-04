@@ -85,9 +85,6 @@ export const orderSlice = createSlice({
   },
 });
 
-// Для получения состояния заказа
-export const selectOrder = (state: RootState) => state.orderStore.items;
-
 export const {
   addItemToOrder,
   removeItemFromOrder,
