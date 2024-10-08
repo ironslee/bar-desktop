@@ -31,6 +31,7 @@ export const orderSlice = createSlice({
           product,
           quantity: 1,
           totalPrice: product.retprice,
+          printedQuantity: 0,
         });
       }
       state.totalAmount += product.retprice;

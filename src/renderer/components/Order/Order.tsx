@@ -12,7 +12,7 @@ import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import { colors } from '../../app/providers/ThemeProvider';
 import { Clients } from '../Clients';
-import { syncTableOrder } from '../Tables';
+import { savePrintedItems, syncTableOrder } from '../Tables';
 import { Discount } from '../Discount';
 
 const { Title } = Typography;
@@ -32,8 +32,16 @@ const Order = (): JSX.Element => {
   const orderClient = useAppSelector(
     (state) => state.clientsStore.selectedClient,
   );
+  const orderUser = useAppSelector((state) => state.usersStore.selectedUser);
 
   const orderItems = useAppSelector((state) => state.orderStore.items);
+  // const tableOrderItems = useAppSelector((state) => state.tablesStore.selectedTable)
+  const tableOrderItems = useAppSelector((state: RootState) => {
+    const tableOrder = state.tablesStore.tableOrders.find(
+      (order) => order.tableId === tableId,
+    );
+    return tableOrder ? tableOrder.orderItems : [];
+  });
 
   const [isDiscountOpen, setIsDiscountOpen] = useState(false);
   const onChangeDiscountModal = () => {
@@ -56,10 +64,11 @@ const Order = (): JSX.Element => {
           orderItems,
           orderClient: orderClient || undefined,
           orderDiscount: discount,
+          orderUser: orderUser || undefined,
         }),
       );
     }
-  }, [tableId, orderItems, dispatch, discount, orderClient]);
+  }, [tableId, orderItems, dispatch, discount, orderClient, orderUser]);
 
   const handleAdd = (productId: number) => {
     const product = items.find(
@@ -76,6 +85,20 @@ const Order = (): JSX.Element => {
 
   const handleDelete = (productId: number) => {
     dispatch(deleteItemFromOrder(productId));
+  };
+
+  const handlePrint = () => {
+    if (tableId && tableOrderItems) {
+      const itemsToPrint = tableOrderItems
+        .filter((item) => item.quantity > item.printedQuantity) // Только те, которые еще не отправлены
+        .map((item) => ({
+          ...item,
+          printedQuantity: item.quantity - item.printedQuantity, // Отправляем только оставшиеся
+        }));
+
+      console.log('SEND TO PRINT: ', itemsToPrint);
+      dispatch(savePrintedItems({ tableId, printedItems: itemsToPrint }));
+    }
   };
 
   return (
@@ -148,6 +171,11 @@ const Order = (): JSX.Element => {
             onChangeModal={onChangeDiscountModal}
             isOpen={isDiscountOpen}
           />
+        </Row>
+        <Row>
+          <Button onClick={handlePrint} type="primary">
+            Бегунок
+          </Button>
         </Row>
         <Row justify="space-between" style={{ marginTop: '20px' }}>
           <Button type="default">Пред печать</Button>

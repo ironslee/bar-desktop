@@ -18,13 +18,23 @@ export const usersSlice = createSlice({
     setUsers(state, action: PayloadAction<UserItem[]>) {
       state.users = action.payload;
     },
+
     selectUser(state, action: PayloadAction<number>) {
       const userId = action.payload;
       state.selectedUser =
         state.users.find((user) => user.id === userId) || null;
     },
+
+    addUserFromTableOrder(state, action: PayloadAction<UserItem>) {
+      state.selectedUser = action.payload;
+    },
+
+    clearUser(state) {
+      state.selectedUser = null;
+    },
   },
 });
 
-export const { setUsers, selectUser } = usersSlice.actions;
+export const { setUsers, selectUser, addUserFromTableOrder, clearUser } =
+  usersSlice.actions;
 export default usersSlice.reducer;

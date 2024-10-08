@@ -2,6 +2,11 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TableItem, TableStatus } from '../../types/Table';
 import { OrderItem } from '../../types/Order';
 import { ClientItem } from '../../types/Client';
+import { UserItem } from '../../types/User';
+
+// interface OrderItemPrinted extends OrderItem {
+//   printedQuantity?: number;
+// }
 
 interface TableOrder {
   tableId: number;
@@ -9,6 +14,7 @@ interface TableOrder {
   orderItems?: OrderItem[];
   orderDiscount?: number;
   orderClient?: ClientItem | null;
+  orderUser?: UserItem | null;
 }
 
 interface TablesState {
@@ -61,24 +67,65 @@ export const tablesSlice = createSlice({
         orderItems: OrderItem[];
         orderClient?: ClientItem;
         orderDiscount: number;
+        orderUser?: UserItem;
       }>,
     ) {
-      const { tableId, orderItems, orderClient, orderDiscount } =
+      const { tableId, orderItems, orderClient, orderDiscount, orderUser } =
         action.payload;
 
       // Поиск заказа для стола
       const tableOrder = state.tableOrders.find(
         (order) => order.tableId === tableId,
       );
-      // Привязка товаров из заказа к столу
+
       if (tableOrder) {
-        tableOrder.orderItems = orderItems;
+        tableOrder.orderItems = orderItems.map((newItem) => {
+          const existingItem = tableOrder.orderItems?.find(
+            (item) => item.product.id === newItem.product.id,
+          );
+          return {
+            ...newItem,
+            printedQuantity: existingItem ? existingItem.printedQuantity : 0,
+          };
+        });
         tableOrder.orderDiscount = orderDiscount;
         tableOrder.orderClient = orderClient;
+        tableOrder.orderUser = orderUser;
+      }
+    },
+
+    savePrintedItems(
+      state,
+      action: PayloadAction<{
+        tableId: number;
+        printedItems: OrderItem[];
+      }>,
+    ) {
+      const { tableId, printedItems } = action.payload;
+      const tableOrder = state.tableOrders.find(
+        (order) => order.tableId === tableId,
+      );
+
+      if (tableOrder) {
+        printedItems.forEach((printedItem) => {
+          const existingItem = tableOrder.orderItems?.find(
+            (item) => item.product.id === printedItem.product.id,
+          );
+          if (
+            existingItem &&
+            printedItem.quantity > existingItem.printedQuantity
+          ) {
+            // Увеличиваем только на количество, которое еще не было отправлено на печать
+            const notPrintedQuantity =
+              printedItem.quantity - existingItem.printedQuantity;
+            existingItem.printedQuantity += notPrintedQuantity;
+          }
+        });
       }
     },
   },
 });
 
-export const { setTables, selectTable, syncTableOrder } = tablesSlice.actions;
+export const { setTables, selectTable, syncTableOrder, savePrintedItems } =
+  tablesSlice.actions;
 export default tablesSlice.reducer;

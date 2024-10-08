@@ -1,4 +1,16 @@
-import usersReducer, { setUsers } from './Users.slice';
+import usersReducer, {
+  setUsers,
+  selectUser,
+  addUserFromTableOrder,
+  clearUser,
+} from './Users.slice';
 import Users from './Users';
 
-export { Users, usersReducer, setUsers };
+export {
+  Users,
+  usersReducer,
+  setUsers,
+  selectUser,
+  addUserFromTableOrder,
+  clearUser,
+};

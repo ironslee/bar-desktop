@@ -9,6 +9,7 @@ import { OrderItem } from '../../types/Order';
 import { addItemsFromTableOrder, clearOrder } from '../Order';
 import { addClientFromTableOrder, clearClient } from '../Clients';
 import { addDiscountFromTableOrder, clearDiscount } from '../Discount';
+import { addUserFromTableOrder, clearUser } from '../Users';
 
 interface TablesProps {
   onChangeModal: () => void;
@@ -54,12 +55,16 @@ const Tables = ({ onChangeModal, isTablesOpen }: TablesProps): JSX.Element => {
       if (tableOrder.orderClient) {
         dispatch(addClientFromTableOrder(tableOrder.orderClient ?? null));
       }
+      if (tableOrder.orderUser) {
+        dispatch(addUserFromTableOrder(tableOrder.orderUser ?? null));
+      }
       dispatch(addDiscountFromTableOrder(tableOrder.orderDiscount ?? 0));
     }
     if (!tableOrder) {
       dispatch(clearOrder());
       dispatch(clearClient());
       dispatch(clearDiscount());
+      dispatch(clearUser());
     }
     onChangeModal();
   };
