@@ -14,12 +14,14 @@ import { colors } from '../../app/providers/ThemeProvider';
 import { Clients } from '../Clients';
 import { savePrintedItems, syncTableOrder } from '../Tables';
 import { Discount } from '../Discount';
+import { KitchenTicket, KitchenTicketItem } from '../../types/Print';
 
 const { Title } = Typography;
 
 const Order = (): JSX.Element => {
   const dispatch = useAppDispatch();
   const [isOpen, setIsOpen] = useState(false);
+  const [kitchenTicket, setKitchenTicket] = useState<KitchenTicket>();
   const { items, totalAmount } = useAppSelector(
     (state: RootState) => state.orderStore,
   );
@@ -33,6 +35,13 @@ const Order = (): JSX.Element => {
     (state) => state.clientsStore.selectedClient,
   );
   const orderUser = useAppSelector((state) => state.usersStore.selectedUser);
+
+  // const selectedTable = useAppSelector((state) =>
+  //   state.tablesStore.tableOrders.find((order) => order.tableId === tableId),
+  // );
+  const selectedTable = useAppSelector(
+    (state) => state.tablesStore.selectedTable,
+  );
 
   const orderItems = useAppSelector((state) => state.orderStore.items);
   // const tableOrderItems = useAppSelector((state) => state.tablesStore.selectedTable)
@@ -70,6 +79,22 @@ const Order = (): JSX.Element => {
     }
   }, [tableId, orderItems, dispatch, discount, orderClient, orderUser]);
 
+  useEffect(() => {
+    if (tableOrderItems && selectedTable) {
+      const kitchenTicketItems: KitchenTicketItem[] = tableOrderItems.map(
+        (item) => ({
+          name: item.product.name,
+          quantity: item.quantity - item.printedQuantity,
+        }),
+      );
+      setKitchenTicket({
+        items: kitchenTicketItems,
+        table: selectedTable.name,
+      });
+    }
+    console.log('kitchenTicket: ', kitchenTicket);
+  }, [tableId, orderItems, dispatch]);
+
   const handleAdd = (productId: number) => {
     const product = items.find(
       (item: OrderItem) => item.product.id === productId,
@@ -87,7 +112,7 @@ const Order = (): JSX.Element => {
     dispatch(deleteItemFromOrder(productId));
   };
 
-  const handlePrint = () => {
+  const handlePrint = async () => {
     if (tableId && tableOrderItems) {
       const itemsToPrint = tableOrderItems
         .filter((item) => item.quantity > item.printedQuantity) // Только те, которые еще не отправлены
@@ -98,6 +123,13 @@ const Order = (): JSX.Element => {
 
       console.log('SEND TO PRINT: ', itemsToPrint);
       dispatch(savePrintedItems({ tableId, printedItems: itemsToPrint }));
+      try {
+        if (kitchenTicket) {
+          await window.electron.printKitchenTicket(kitchenTicket);
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 

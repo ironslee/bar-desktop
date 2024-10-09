@@ -21,13 +21,20 @@ import {
   MENU_GET_CATEGORIES,
   MENU_GET_PRODUCTS_BY_CATEGORY,
   OPEN_ROUTE,
+  PRINT_KITCHEN_TICKET,
   TABLES_GET,
   USERS_GET,
 } from './services/main-constants';
 import { openRoute } from './services/route.service';
 import { getUsers } from './services/users.service';
-import { getAllProducts, getCategories, getProductsByCategory } from './services/menu.service';
+import {
+  getAllProducts,
+  getCategories,
+  getProductsByCategory,
+} from './services/menu.service';
 import { getClients } from './services/clients.service';
+import { KitchenTicket } from '../renderer/types/Print';
+import { printKitchenTicket } from './services/print.service';
 
 class AppUpdater {
   constructor() {
@@ -167,6 +174,14 @@ app
     ipcMain.on(OPEN_ROUTE, (_, route: string) => {
       return openRoute(route);
     });
+
+    // Print methods
+    ipcMain.handle(
+      PRINT_KITCHEN_TICKET,
+      (_, kitchenTicket: KitchenTicket): Promise<boolean> => {
+        return printKitchenTicket(kitchenTicket);
+      },
+    );
 
     createWindow();
     app.on('activate', () => {

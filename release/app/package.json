@@ -15,7 +15,7 @@
     "link-modules": "node -r ts-node/register ../../.erb/scripts/link-modules.ts"
   },
   "dependencies": {
-    "better-sqlite3": "^11.2.1"
-  },
-  "devDependencies": {}
+    "better-sqlite3": "^11.2.1",
+    "electron-pos-printer": "1.3.6"
+  }
 }
