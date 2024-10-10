@@ -81,19 +81,23 @@ const Order = (): JSX.Element => {
 
   useEffect(() => {
     if (tableOrderItems && selectedTable) {
-      const kitchenTicketItems: KitchenTicketItem[] = tableOrderItems.map(
-        (item) => ({
+      // Фильтруем элементы с quantity > 0
+      const kitchenTicketItems: KitchenTicketItem[] = tableOrderItems
+        .filter((item) => item.quantity - item.printedQuantity > 0)
+        .map((item) => ({
           name: item.product.name,
           quantity: item.quantity - item.printedQuantity,
-        }),
-      );
+        }));
+
+      // Обновляем kitchenTicket с учетом новых элементов
       setKitchenTicket({
         items: kitchenTicketItems,
         table: selectedTable.name,
       });
     }
+
     console.log('kitchenTicket: ', kitchenTicket);
-  }, [tableId, orderItems, dispatch]);
+  }, [items, tableOrderItems]);
 
   const handleAdd = (productId: number) => {
     const product = items.find(
@@ -124,8 +128,13 @@ const Order = (): JSX.Element => {
       console.log('SEND TO PRINT: ', itemsToPrint);
       dispatch(savePrintedItems({ tableId, printedItems: itemsToPrint }));
       try {
-        if (kitchenTicket) {
+        if (kitchenTicket && kitchenTicket.items.length > 0) {
           await window.electron.printKitchenTicket(kitchenTicket);
+          setKitchenTicket((prevState) => ({
+            ...prevState,
+            items: [],
+            table: '',
+          }));
         }
       } catch (error) {
         console.log(error);
