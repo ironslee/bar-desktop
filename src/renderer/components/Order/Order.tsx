@@ -14,7 +14,7 @@ import { colors } from '../../app/providers/ThemeProvider';
 import { Clients } from '../Clients';
 import { savePrintedItems, syncTableOrder } from '../Tables';
 import { Discount } from '../Discount';
-import { KitchenTicket, KitchenTicketItem } from '../../types/Print';
+import { KitchenTicket, KitchenTicketItem, PreCheck } from '../../types/Print';
 
 const { Title } = Typography;
 
@@ -22,6 +22,7 @@ const Order = (): JSX.Element => {
   const dispatch = useAppDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const [kitchenTicket, setKitchenTicket] = useState<KitchenTicket>();
+  const [preCheck, setPreCheck] = useState<PreCheck>();
   const { items, totalAmount } = useAppSelector(
     (state: RootState) => state.orderStore,
   );
@@ -52,6 +53,10 @@ const Order = (): JSX.Element => {
     return tableOrder ? tableOrder.orderItems : [];
   });
 
+  const tableOrder = useAppSelector((state) =>
+    state.tablesStore.tableOrders.find((order) => order.tableId === tableId),
+  );
+
   const [isDiscountOpen, setIsDiscountOpen] = useState(false);
   const onChangeDiscountModal = () => {
     setIsDiscountOpen(!isDiscountOpen);
@@ -78,6 +83,25 @@ const Order = (): JSX.Element => {
       );
     }
   }, [tableId, orderItems, dispatch, discount, orderClient, orderUser]);
+
+  useEffect(() => {
+    if (
+      tableId &&
+      tableOrder?.checkNumber &&
+      selectedTable &&
+      tableOrderItems
+    ) {
+      setPreCheck({
+        checkId: tableOrder.checkNumber,
+        table: selectedTable.name,
+        user: tableOrder.orderUser?.name || '',
+        client: tableOrder.orderClient?.name || '',
+        totalAmount,
+        discount,
+        items: tableOrderItems,
+      });
+    }
+  }, [tableOrder]);
 
   useEffect(() => {
     if (tableOrderItems && selectedTable) {
@@ -116,7 +140,22 @@ const Order = (): JSX.Element => {
     dispatch(deleteItemFromOrder(productId));
   };
 
-  const handlePrint = async () => {
+  // const discountedTotal =
+  //   discount > 0 ? totalAmount - (totalAmount / 100) * discount : totalAmount;
+
+  const handlePrintPreCheck = async () => {
+    try {
+      if (preCheck) {
+        await window.electron.printCheck(preCheck);
+      }
+
+      console.log(preCheck);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handlePrintKitchenTicket = async () => {
     if (tableId && tableOrderItems) {
       const itemsToPrint = tableOrderItems
         .filter((item) => item.quantity > item.printedQuantity) // Только те, которые еще не отправлены
@@ -214,12 +253,14 @@ const Order = (): JSX.Element => {
           />
         </Row>
         <Row>
-          <Button onClick={handlePrint} type="primary">
+          <Button onClick={handlePrintKitchenTicket} type="primary">
             Бегунок
           </Button>
         </Row>
         <Row justify="space-between" style={{ marginTop: '20px' }}>
-          <Button type="default">Пред печать</Button>
+          <Button onClick={handlePrintPreCheck} type="default">
+            Пред печать
+          </Button>
           <Button type="primary">Оплатить</Button>
         </Row>
       </Card>

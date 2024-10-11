@@ -5,7 +5,7 @@ import {
 } from 'electron-pos-printer';
 import moment from 'moment';
 import log from 'electron-log';
-import { KitchenTicket } from '../../renderer/types/Print';
+import { KitchenTicket, PreCheck } from '../../renderer/types/Print';
 
 export const printKitchenTicket = async (
   kitchenTicket: KitchenTicket,
@@ -115,6 +115,243 @@ export const printKitchenTicket = async (
         tableBodyStyle: { border: '1px solid #000' },
         // custom style for the table footer
         tableFooterStyle: {},
+      },
+    ];
+
+    const res = await PosPrinter.print(data, options)
+      .then(() => {
+        log.info('Print success');
+        return true;
+      })
+      .catch((error) => {
+        log.info('Print failed');
+        log.info(error);
+        console.error(error);
+        return false;
+      });
+
+    return res;
+  } catch (error) {
+    log.info('Print failed');
+    log.info(error);
+    console.log(error);
+
+    return false;
+  }
+};
+
+export const printCheck = async (orderCheck: PreCheck): Promise<boolean> => {
+  try {
+    const date = moment().format('DD.MM.YYYY, hh:mm');
+    // const sum = cart.selectedProducts.reduce((acc, item) => {
+    //   if (item.countInCart > 0) {
+    //     acc +=
+    //       (cart.isRetail ? item.retailPrice : item.tradePrice) *
+    //       item.countInCart;
+    //   }
+
+    //   return acc;
+    // }, 0);
+    // const discountAmount = Math.ceil((sum / 100) * cart.discountPercentage);
+    // const discountSum = sum - discountAmount;
+    // const paymentsList = cart.payments.reduce<any[]>((acc, payment) => {
+    //   if (payment.amount > 0) {
+    //     acc.push({
+    //       type: 'text', // 'text' | 'barCode' | 'qrCode' | 'image' | 'table
+    //       value: `${payment.label}: ${payment.amount} тг`,
+    //       style: {
+    //         fontWeight: '700',
+    //         textAlign: 'right',
+    //         fontSize: '18px',
+    //         marginBottom: '2px',
+    //       },
+    //     });
+    //   }
+
+    //   return acc;
+    // }, []);
+    // const appId = await getAppId();
+
+    const options: PosPrintOptions = {
+      boolean: false,
+      silent: true,
+      margin: '0 0 0 0',
+      margins: {
+        marginType: 'none',
+      },
+      copies: 1,
+      printerName: '',
+      pageSize: '80mm',
+      timeOutPerLine: 5000,
+    };
+
+    const data: PosPrintData[] = [
+      {
+        type: 'text', // 'text' | 'barCode' | 'qrCode' | 'image' | 'table
+        value: 'Бариста',
+        style: {
+          fontWeight: '700',
+          textAlign: 'center',
+          fontSize: '16px',
+          marginBottom: '4px',
+        },
+      },
+      {
+        type: 'text', // 'text' | 'barCode' | 'qrCode' | 'image' | 'table
+        value: `Стол ${orderCheck.table}`,
+        style: {
+          fontWeight: '700',
+          textAlign: 'center',
+          fontSize: '14px',
+          marginBottom: '12px',
+          padding: '0 12px',
+        },
+      },
+      {
+        type: 'table',
+        // style the table
+        style: {
+          border: '1px solid transparent',
+          color: '#000',
+          fontSize: '12px',
+          borderCollapse: 'unset',
+          marginBottom: '16px',
+        },
+        // list of the columns to be rendered in the table header
+        tableHeader: ['', ''],
+        // multi dimensional array depicting the rows and columns of the table body
+        tableBody: [
+          [
+            {
+              type: 'text', // 'text' | 'barCode' | 'qrCode' | 'image' | 'table
+              value: 'Дата: ',
+              style: {
+                fontWeight: '600',
+                textAlign: 'left',
+              },
+            },
+            {
+              type: 'text', // 'text' | 'barCode' | 'qrCode' | 'image' | 'table
+              value: date,
+              style: {
+                fontWeight: '600',
+                textAlign: 'right',
+              },
+            },
+          ],
+          [
+            {
+              type: 'text',
+              value: 'Клиент:',
+              style: { textAlign: 'left', fontWeight: '600' },
+            },
+            {
+              type: 'text',
+              value: orderCheck.client,
+              style: { textAlign: 'right', fontWeight: '600' },
+            },
+          ],
+          [
+            {
+              type: 'text',
+              value: 'Официант:',
+              style: { textAlign: 'left', fontWeight: '600' },
+            },
+            {
+              type: 'text',
+              value: orderCheck.user,
+              style: { textAlign: 'right', fontWeight: '600' },
+            },
+          ],
+        ],
+        // custom style for the table header
+        tableHeaderStyle: {},
+        // custom style for the table body
+        tableBodyStyle: { border: '1px solid transparent' },
+        // custom style for the table footer
+        tableFooterStyle: {},
+      },
+      {
+        type: 'table',
+        // style the table
+        style: {
+          border: '1px solid #000',
+          color: '#000',
+          fontSize: '12px',
+          marginBottom: '16px',
+        },
+        // list of the columns to be rendered in the table header
+        tableHeader: ['№', 'Наимен.', 'Цена', 'Кол.', 'Сумма'],
+        // multi dimensional array depicting the rows and columns of the table body
+        tableBody: orderCheck.items.map((item, index) => {
+          return [
+            {
+              type: 'text',
+              value: String(index + 1),
+              style: { fontWeight: '600', color: '#000' },
+            },
+            {
+              type: 'text',
+              value: item.product.name,
+              style: { textAlign: 'left', fontWeight: '600', color: '#000' },
+            },
+            {
+              type: 'text',
+              value: String(item.product.retprice),
+              style: { textAlign: 'right', fontWeight: '600', color: '#000' },
+            },
+            {
+              type: 'text',
+              value: String(item.quantity),
+              style: { textAlign: 'center', fontWeight: '600', color: '#000' },
+            },
+            {
+              type: 'text',
+              value: String(item.totalPrice),
+              style: { textAlign: 'right', fontWeight: '600', color: '#000' },
+            },
+          ];
+        }),
+        // custom style for the table header
+        tableHeaderStyle: {},
+        // custom style for the table body
+        tableBodyStyle: { border: '1px solid #000' },
+        // custom style for the table footer
+        tableFooterStyle: {},
+      },
+
+      {
+        type: 'text', // 'text' | 'barCode' | 'qrCode' | 'image' | 'table
+        value: `Скидка: ${orderCheck.discount}%`,
+        style: {
+          fontWeight: '700',
+          textAlign: 'right',
+          fontSize: '18px',
+          marginTop: '8px',
+          marginBottom: '12px',
+        },
+      },
+      {
+        type: 'text', // 'text' | 'barCode' | 'qrCode' | 'image' | 'table
+        value: `ИТОГО: ${orderCheck.totalAmount} тг`,
+        style: {
+          fontWeight: '700',
+          textAlign: 'right',
+          fontSize: '18px',
+          marginTop: '8px',
+          marginBottom: '12px',
+        },
+      },
+      {
+        type: 'text', // 'text' | 'barCode' | 'qrCode' | 'image' | 'table
+        value: `ИТОГО СО СКИДКОЙ: ${orderCheck.totalAmount - (orderCheck.totalAmount / 100) * orderCheck.discount} тг`,
+        style: {
+          fontWeight: '700',
+          textAlign: 'right',
+          fontSize: '18px',
+          marginTop: '8px',
+          marginBottom: '28px',
+        },
       },
     ];
 

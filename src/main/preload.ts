@@ -7,14 +7,15 @@ import {
   MENU_GET_CATEGORIES,
   MENU_GET_PRODUCTS_BY_CATEGORY,
   OPEN_ROUTE,
+  PRINT_CHECK,
   PRINT_KITCHEN_TICKET,
   TABLES_GET,
   USERS_GET,
 } from './services/main-constants';
 import { getClients } from './services/clients.service';
 import { getAllProducts } from './services/menu.service';
-import { KitchenTicket } from '../renderer/types/Print';
-import { printKitchenTicket } from './services/print.service';
+import { KitchenTicket, PreCheck } from '../renderer/types/Print';
+import { printCheck, printKitchenTicket } from './services/print.service';
 
 // export type Channels = 'ipc-example' | 'open-route';
 export type Channels = typeof OPEN_ROUTE;
@@ -46,6 +47,8 @@ const electronHandler = {
   getClients: () => ipcRenderer.invoke(CLIENTS_GET),
   printKitchenTicket: (kitchenTicket: KitchenTicket): Promise<boolean> =>
     ipcRenderer.invoke(PRINT_KITCHEN_TICKET, kitchenTicket),
+  printCheck: (orderCheck: PreCheck): Promise<boolean> =>
+    ipcRenderer.invoke(PRINT_CHECK, orderCheck),
 };
 
 contextBridge.exposeInMainWorld('electron', electronHandler);
