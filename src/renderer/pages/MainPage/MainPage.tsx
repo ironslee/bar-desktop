@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, Button, Typography, Flex } from 'antd';
+import { Layout, Button, Typography, Flex, message } from 'antd';
 import { Tables } from '../../components/Tables';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import { RootState } from '../../app/providers/StoreProvider';
@@ -15,6 +15,9 @@ const MainPage = () => {
   const [isUsersOpen, setIsUsersOpen] = useState(false);
   const { selectedTable, tableOrders } = useAppSelector(
     (state: RootState) => state.tablesStore,
+  );
+  const { selectedUser } = useAppSelector(
+    (state: RootState) => state.usersStore,
   );
 
   const tableOrder = tableOrders.find(
@@ -38,17 +41,33 @@ const MainPage = () => {
               onChangeModal={onChangeTablesModal}
               isTablesOpen={isTablesOpen}
             />
-            <Typography.Title
-              level={4}
-            >{`Чек ${tableOrder ? tableOrder.checkNumber : ''} стол ${selectedTable ? selectedTable.name : 'не выбран'}`}</Typography.Title>
           </Flex>
-          <Flex>
-            <Order />
-          </Flex>
-        </Flex>
-        <Flex vertical align="flex-end">
-          <Users onChangeModal={onChangeUsersModal} isUsersOpen={isUsersOpen} />
-          <Menu />
+
+          {selectedTable && (
+            <Flex>
+              <Users
+                onChangeModal={onChangeUsersModal}
+                isUsersOpen={isUsersOpen}
+              />
+            </Flex>
+          )}
+
+          {selectedTable && selectedUser && (
+            <>
+              <Typography.Title
+                level={4}
+              >{`Чек ${tableOrder ? tableOrder.checkNumber : ''} стол ${selectedTable.name}`}</Typography.Title>
+
+              <Flex>
+                <Flex>
+                  <Order />
+                </Flex>
+                <Flex>
+                  <Menu />
+                </Flex>
+              </Flex>
+            </>
+          )}
         </Flex>
       </Flex>
     </>

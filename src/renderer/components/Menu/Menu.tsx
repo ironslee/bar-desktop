@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Row, Col, message, Input } from 'antd';
+import { Button, Card, Row, Col, message, Input, Flex } from 'antd';
 import { setCategories, setProducts, selectCategory } from './Menu.slice';
 import { RootState } from '../../app/providers/StoreProvider';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
@@ -58,7 +58,7 @@ const Menu = (): JSX.Element => {
     : products;
 
   return (
-    <>
+    <Flex vertical>
       <Input
         placeholder="Поиск по блюдам"
         value={searchQuery}
@@ -95,7 +95,7 @@ const Menu = (): JSX.Element => {
           </Col>
         ))}
       </Row>
-    </>
+    </Flex>
   );
 };
 
