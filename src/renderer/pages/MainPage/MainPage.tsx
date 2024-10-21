@@ -13,6 +13,7 @@ const { Text } = Typography;
 const MainPage = () => {
   const [isTablesOpen, setIsTablesOpen] = useState(false);
   const [isUsersOpen, setIsUsersOpen] = useState(false);
+
   const { selectedTable, tableOrders } = useAppSelector(
     (state: RootState) => state.tablesStore,
   );
