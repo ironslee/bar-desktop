@@ -15,6 +15,7 @@ import { Clients } from '../Clients';
 import { savePrintedItems, syncTableOrder } from '../Tables';
 import { Discount } from '../Discount';
 import { KitchenTicket, KitchenTicketItem, PreCheck } from '../../types/Print';
+import { Payment } from '../Payment';
 
 const { Title } = Typography;
 
@@ -23,6 +24,9 @@ const Order = (): JSX.Element => {
   const [isOpen, setIsOpen] = useState(false);
   const [kitchenTicket, setKitchenTicket] = useState<KitchenTicket>();
   const [preCheck, setPreCheck] = useState<PreCheck>();
+
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+
   const { items, totalAmount } = useAppSelector(
     (state: RootState) => state.orderStore,
   );
@@ -138,6 +142,10 @@ const Order = (): JSX.Element => {
 
   const handleDelete = (productId: number) => {
     dispatch(deleteItemFromOrder(productId));
+  };
+
+  const onChangePaymentModal = () => {
+    setIsPaymentOpen(!isPaymentOpen);
   };
 
   // const discountedTotal =
@@ -261,7 +269,10 @@ const Order = (): JSX.Element => {
           <Button onClick={handlePrintPreCheck} type="default">
             Пред печать
           </Button>
-          <Button type="primary">Оплатить</Button>
+          {/* <Payment
+            isPaymentOpen={isPaymentOpen}
+            onChangeModal={onChangePaymentModal}
+          /> */}
         </Row>
       </Card>
     </>

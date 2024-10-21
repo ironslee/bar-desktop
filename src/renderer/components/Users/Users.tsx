@@ -46,7 +46,7 @@ const Users = ({ onChangeModal, isUsersOpen }: UsersProps): JSX.Element => {
         onClick={() => onChangeModal()}
         style={{ maxWidth: 150 }}
       >
-        {selectedUser ? selectedUser.name : 'Официант не выбран'}
+        {selectedUser ? selectedUser.name : 'Выберите официанта'}
       </Button>
       <Modal
         title="Пользователи"
