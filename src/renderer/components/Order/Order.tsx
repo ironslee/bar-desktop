@@ -14,7 +14,8 @@ import { colors } from '../../app/providers/ThemeProvider';
 import { Clients } from '../Clients';
 import { savePrintedItems, syncTableOrder } from '../Tables';
 import { Discount } from '../Discount';
-import { KitchenTicket, KitchenTicketItem } from '../../types/Print';
+import { KitchenTicket, KitchenTicketItem, PreCheck } from '../../types/Print';
+import { Payment } from '../Payment';
 
 const { Title } = Typography;
 
@@ -22,6 +23,10 @@ const Order = (): JSX.Element => {
   const dispatch = useAppDispatch();
   const [isOpen, setIsOpen] = useState(false);
   const [kitchenTicket, setKitchenTicket] = useState<KitchenTicket>();
+  const [preCheck, setPreCheck] = useState<PreCheck>();
+
+  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
+
   const { items, totalAmount } = useAppSelector(
     (state: RootState) => state.orderStore,
   );
@@ -52,6 +57,10 @@ const Order = (): JSX.Element => {
     return tableOrder ? tableOrder.orderItems : [];
   });
 
+  const tableOrder = useAppSelector((state) =>
+    state.tablesStore.tableOrders.find((order) => order.tableId === tableId),
+  );
+
   const [isDiscountOpen, setIsDiscountOpen] = useState(false);
   const onChangeDiscountModal = () => {
     setIsDiscountOpen(!isDiscountOpen);
@@ -80,20 +89,43 @@ const Order = (): JSX.Element => {
   }, [tableId, orderItems, dispatch, discount, orderClient, orderUser]);
 
   useEffect(() => {
+    if (
+      tableId &&
+      tableOrder?.checkNumber &&
+      selectedTable &&
+      tableOrderItems
+    ) {
+      setPreCheck({
+        checkId: tableOrder.checkNumber,
+        table: selectedTable.name,
+        user: tableOrder.orderUser?.name || '',
+        client: tableOrder.orderClient?.name || '',
+        totalAmount,
+        discount,
+        items: tableOrderItems,
+      });
+    }
+  }, [tableOrder]);
+
+  useEffect(() => {
     if (tableOrderItems && selectedTable) {
-      const kitchenTicketItems: KitchenTicketItem[] = tableOrderItems.map(
-        (item) => ({
+      // Фильтруем элементы с quantity > 0
+      const kitchenTicketItems: KitchenTicketItem[] = tableOrderItems
+        .filter((item) => item.quantity - item.printedQuantity > 0)
+        .map((item) => ({
           name: item.product.name,
           quantity: item.quantity - item.printedQuantity,
-        }),
-      );
+        }));
+
+      // Обновляем kitchenTicket с учетом новых элементов
       setKitchenTicket({
         items: kitchenTicketItems,
         table: selectedTable.name,
       });
     }
+
     console.log('kitchenTicket: ', kitchenTicket);
-  }, [tableId, orderItems, dispatch]);
+  }, [items, tableOrderItems]);
 
   const handleAdd = (productId: number) => {
     const product = items.find(
@@ -112,7 +144,26 @@ const Order = (): JSX.Element => {
     dispatch(deleteItemFromOrder(productId));
   };
 
-  const handlePrint = async () => {
+  const onChangePaymentModal = () => {
+    setIsPaymentOpen(!isPaymentOpen);
+  };
+
+  // const discountedTotal =
+  //   discount > 0 ? totalAmount - (totalAmount / 100) * discount : totalAmount;
+
+  const handlePrintPreCheck = async () => {
+    try {
+      if (preCheck) {
+        await window.electron.printCheck(preCheck);
+      }
+
+      console.log(preCheck);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handlePrintKitchenTicket = async () => {
     if (tableId && tableOrderItems) {
       const itemsToPrint = tableOrderItems
         .filter((item) => item.quantity > item.printedQuantity) // Только те, которые еще не отправлены
@@ -124,8 +175,13 @@ const Order = (): JSX.Element => {
       console.log('SEND TO PRINT: ', itemsToPrint);
       dispatch(savePrintedItems({ tableId, printedItems: itemsToPrint }));
       try {
-        if (kitchenTicket) {
+        if (kitchenTicket && kitchenTicket.items.length > 0) {
           await window.electron.printKitchenTicket(kitchenTicket);
+          setKitchenTicket((prevState) => ({
+            ...prevState,
+            items: [],
+            table: '',
+          }));
         }
       } catch (error) {
         console.log(error);
@@ -205,13 +261,18 @@ const Order = (): JSX.Element => {
           />
         </Row>
         <Row>
-          <Button onClick={handlePrint} type="primary">
+          <Button onClick={handlePrintKitchenTicket} type="primary">
             Бегунок
           </Button>
         </Row>
         <Row justify="space-between" style={{ marginTop: '20px' }}>
-          <Button type="default">Пред печать</Button>
-          <Button type="primary">Оплатить</Button>
+          <Button onClick={handlePrintPreCheck} type="default">
+            Пред печать
+          </Button>
+          {/* <Payment
+            isPaymentOpen={isPaymentOpen}
+            onChangeModal={onChangePaymentModal}
+          /> */}
         </Row>
       </Card>
     </>

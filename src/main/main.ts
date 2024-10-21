@@ -21,6 +21,8 @@ import {
   MENU_GET_CATEGORIES,
   MENU_GET_PRODUCTS_BY_CATEGORY,
   OPEN_ROUTE,
+  ORDER_SAVE,
+  PRINT_CHECK,
   PRINT_KITCHEN_TICKET,
   TABLES_GET,
   USERS_GET,
@@ -33,8 +35,10 @@ import {
   getProductsByCategory,
 } from './services/menu.service';
 import { getClients } from './services/clients.service';
-import { KitchenTicket } from '../renderer/types/Print';
-import { printKitchenTicket } from './services/print.service';
+import { KitchenTicket, PreCheck } from '../renderer/types/Print';
+import { printCheck, printKitchenTicket } from './services/print.service';
+import { CreateOrderDbItem } from '../renderer/types/Order';
+import { saveOrder } from './services/order.service';
 
 class AppUpdater {
   constructor() {
@@ -170,6 +174,11 @@ app
       return getClients();
     });
 
+    //Order methods
+    ipcMain.handle(ORDER_SAVE, async (_, data: CreateOrderDbItem) => {
+      return saveOrder(data);
+    });
+
     // Menu methods
     ipcMain.on(OPEN_ROUTE, (_, route: string) => {
       return openRoute(route);
@@ -182,6 +191,10 @@ app
         return printKitchenTicket(kitchenTicket);
       },
     );
+
+    ipcMain.handle(PRINT_CHECK, (_, orderCheck: PreCheck): Promise<boolean> => {
+      return printCheck(orderCheck);
+    });
 
     createWindow();
     app.on('activate', () => {

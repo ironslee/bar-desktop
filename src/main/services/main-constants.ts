@@ -5,6 +5,8 @@ export const MENU_GET_PRODUCTS_BY_CATEGORY = 'menu:getProductsByCategory';
 export const MENU_GET_ALL_PRODUCTS = 'menu:getAllProducts';
 export const CLIENTS_GET = 'clients:get';
 export const PRINT_KITCHEN_TICKET = 'print:kitchenTicket';
+export const PRINT_CHECK = 'print:check';
+export const ORDER_SAVE = 'order:save';
 
 export const OPEN_ROUTE = 'openRoute';
 // export const PRINT_RECEIPT = 'print:receipt';

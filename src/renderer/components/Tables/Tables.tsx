@@ -72,7 +72,7 @@ const Tables = ({ onChangeModal, isTablesOpen }: TablesProps): JSX.Element => {
   return (
     <>
       <Button type="primary" onClick={() => onChangeModal()}>
-        Столы
+        {selectedTable ? selectedTable.name : 'Выберите стол'}
       </Button>
       <Modal
         title="Столы"
