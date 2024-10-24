@@ -17,28 +17,33 @@ import { resolveHtmlPath } from './util';
 import { getTables } from './services/tables.service';
 import {
   CLIENTS_GET,
+  CLIENTS_GET_BY_ID,
   MENU_GET_ALL_PRODUCTS,
   MENU_GET_CATEGORIES,
+  MENU_GET_PRODUCT_BY_ID,
   MENU_GET_PRODUCTS_BY_CATEGORY,
   OPEN_ROUTE,
+  ORDER_GET_OPEN,
   ORDER_SAVE,
   PRINT_CHECK,
   PRINT_KITCHEN_TICKET,
   TABLES_GET,
   USERS_GET,
+  USERS_GET_BY_ID,
 } from './services/main-constants';
 import { openRoute } from './services/route.service';
-import { getUsers } from './services/users.service';
+import { getUserById, getUsers } from './services/users.service';
 import {
   getAllProducts,
   getCategories,
+  getProductById,
   getProductsByCategory,
 } from './services/menu.service';
-import { getClients } from './services/clients.service';
+import { getClientById, getClients } from './services/clients.service';
 import { KitchenTicket, PreCheck } from '../renderer/types/Print';
 import { printCheck, printKitchenTicket } from './services/print.service';
-import { CreateOrderDbItem } from '../renderer/types/Order';
-import { saveOrder } from './services/order.service';
+import { SaveOrderData } from '../renderer/types/Order';
+import { getOpenOrders, saveOrder } from './services/order.service';
 
 class AppUpdater {
   constructor() {
@@ -158,6 +163,9 @@ app
     ipcMain.handle(USERS_GET, async () => {
       return getUsers();
     });
+    ipcMain.handle(USERS_GET_BY_ID, async (_, userId: number) => {
+      return getUserById(userId);
+    });
     ipcMain.handle(MENU_GET_CATEGORIES, async () => {
       return getCategories();
     });
@@ -170,13 +178,22 @@ app
     ipcMain.handle(MENU_GET_ALL_PRODUCTS, async () => {
       return getAllProducts();
     });
+    ipcMain.handle(MENU_GET_PRODUCT_BY_ID, async (_, id: number) => {
+      return getProductById(id);
+    });
     ipcMain.handle(CLIENTS_GET, async () => {
       return getClients();
     });
+    ipcMain.handle(CLIENTS_GET_BY_ID, async (_, clientId: number) => {
+      return getClientById(clientId);
+    });
 
     //Order methods
-    ipcMain.handle(ORDER_SAVE, async (_, data: CreateOrderDbItem) => {
+    ipcMain.handle(ORDER_SAVE, async (_, data: SaveOrderData) => {
       return saveOrder(data);
+    });
+    ipcMain.handle(ORDER_GET_OPEN, async () => {
+      return getOpenOrders();
     });
 
     // Menu methods

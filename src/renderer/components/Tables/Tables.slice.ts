@@ -65,18 +65,31 @@ export const tablesSlice = createSlice({
       action: PayloadAction<{
         tableId: number;
         orderItems: OrderItem[];
+        orderUser: UserItem;
         orderClient?: ClientItem;
         orderDiscount: number;
-        orderUser?: UserItem;
+        checkNumber?: number;
       }>,
     ) {
-      const { tableId, orderItems, orderClient, orderDiscount, orderUser } =
+      const { tableId, orderItems, orderClient, orderDiscount, orderUser, checkNumber } =
         action.payload;
 
       // Поиск заказа для стола
-      const tableOrder = state.tableOrders.find(
+      let tableOrder = state.tableOrders.find(
         (order) => order.tableId === tableId,
       );
+
+      if (!tableOrder) {
+        tableOrder = {
+          tableId,
+          orderItems: [],
+          orderDiscount: 0,
+          orderClient: null,
+          orderUser: null,
+          checkNumber: checkNumber ?? 0,
+        };
+        state.tableOrders.push(tableOrder); // Добавляем новый заказ в tableOrders
+      }
 
       if (tableOrder) {
         tableOrder.orderItems = orderItems.map((newItem) => {
@@ -85,12 +98,14 @@ export const tablesSlice = createSlice({
           );
           return {
             ...newItem,
-            printedQuantity: existingItem ? existingItem.printedQuantity : 0,
+            // printedQuantity: existingItem ? existingItem.printedQuantity : 0,
+            printedQuantity: existingItem ? existingItem.printedQuantity : newItem.printedQuantity ?? 0,
           };
         });
         tableOrder.orderDiscount = orderDiscount;
         tableOrder.orderClient = orderClient;
         tableOrder.orderUser = orderUser;
+        tableOrder.checkNumber = checkNumber ?? tableOrder.checkNumber;
       }
     },
 

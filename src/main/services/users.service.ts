@@ -17,3 +17,20 @@ export const getUsers = () => {
 
   return users as UserItem[];
 };
+
+export const getUserById = (userId: number): UserItem => {
+  const db = connect();
+  const usersQuery = db.prepare(
+    `
+      SELECT id, name, number
+      FROM users
+      WHERE id = ?;
+    `,
+  );
+
+  const user = usersQuery.get(userId);
+
+  db.close();
+
+  return user as UserItem;
+};
