@@ -7,7 +7,7 @@ import {
   removeItemFromOrder,
   deleteItemFromOrder,
 } from './Order.slice';
-import { OrderItem } from '../../types/Order';
+import { OrderItem, OrderStatus } from '../../types/Order';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import { colors } from '../../app/providers/ThemeProvider';
@@ -75,14 +75,14 @@ const Order = (): JSX.Element => {
   }, [items]);
 
   useEffect(() => {
-    if (tableId) {
+    if (tableId && orderUser) {
       dispatch(
         syncTableOrder({
           tableId,
           orderItems,
           orderClient: orderClient || undefined,
           orderDiscount: discount,
-          orderUser: orderUser || undefined,
+          orderUser,
         }),
       );
     }
@@ -170,12 +170,34 @@ const Order = (): JSX.Element => {
         .map((item) => ({
           ...item,
           printedQuantity: item.quantity - item.printedQuantity, // Отправляем только оставшиеся
+          productId: item.product.id,
+          price: item.product.retprice,
         }));
 
       console.log('SEND TO PRINT: ', itemsToPrint);
       dispatch(savePrintedItems({ tableId, printedItems: itemsToPrint }));
       try {
         if (kitchenTicket && kitchenTicket.items.length > 0) {
+          const newOrder = {
+            number: tableOrder?.checkNumber ?? 0, // Номер чека
+            createdAt: new Date().toISOString(), // Дата создания
+            totalAmount, // Общая сумма заказа
+            discountId: discount, // скдика
+            discountTotalAmount:
+              discount > 0
+                ? totalAmount - (totalAmount / 100) * discount
+                : totalAmount, // Сумма после скидки
+            paymentTypeId: null, // Тип оплаты
+            table_id: tableId, // ID стола
+            client: orderClient?.id || null, // Имя клиента
+            created_by: orderUser?.id || null, // Имя пользователя, кто создал заказ
+            status: OrderStatus.OPEN, // Статус заказа
+            orderItems: itemsToPrint, // Позиции заказа
+          };
+
+          // Сохраняем заказ в базе данных
+          const orderId = await window.electron.saveOrder(newOrder);
+
           await window.electron.printKitchenTicket(kitchenTicket);
           setKitchenTicket((prevState) => ({
             ...prevState,

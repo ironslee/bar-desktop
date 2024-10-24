@@ -52,3 +52,20 @@ export const getAllProducts = (): ProductItem[] => {
 
   return allProducts as ProductItem[];
 };
+
+export const getProductById = (id: number): ProductItem => {
+  const db = connect();
+  const productQuery = db.prepare(
+    `
+      SELECT id, name, vendorcodes, retprice, categoryId, link, statuses
+      FROM products
+      WHERE id = ?;
+    `,
+  );
+
+  const product = productQuery.get(id);
+
+  db.close();
+
+  return product as ProductItem;
+};
