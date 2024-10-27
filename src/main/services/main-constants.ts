@@ -10,6 +10,7 @@ export const CLIENTS_GET_BY_ID = 'clients:getById';
 export const PRINT_KITCHEN_TICKET = 'print:kitchenTicket';
 export const PRINT_CHECK = 'print:check';
 export const ORDER_SAVE = 'order:saveOrder';
+export const ORDER_CLOSE = 'order:closeOrder';
 export const ORDER_GET_OPEN = 'order:getOpenOrders';
 
 export const OPEN_ROUTE = 'openRoute';

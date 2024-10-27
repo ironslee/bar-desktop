@@ -2,56 +2,13 @@ import { ProductItem } from '../../renderer/types/Product';
 import { CategoryItem } from '../../renderer/types/Category';
 import { connect } from './connectDb';
 import {
+  CloseOrderData,
   OrderDbItem,
   OrderDbItemWithOrderItems,
   OrderItemsDbItem,
   OrderStatus,
   SaveOrderData,
 } from '../../renderer/types/Order';
-
-// export const saveOrder = (data: SaveOrderData) => {
-//   const db = connect();
-
-//   // Вставка в таблицу orders
-//   const orderQuery = db.prepare(`
-//     INSERT INTO orders (number, createdAt, totalAmount, discountId, discountTotalAmount, paymentTypeId, table_id, client, created_by, status)
-//     VALUES (@number, @createdAt, @totalAmount, @discountId, @discountTotalAmount, @paymentTypeId, @table_id, @client, @created_by, @status)
-//     RETURNING id;
-//   `);
-//   console.log('Executing query for saving order:', orderQuery);
-
-//   // Вставляем заказ и получаем его ID
-//   const orderId = orderQuery.run(data).lastInsertRowid;
-
-//   // Вставка позиций заказа в таблицу order_items
-//   const insertItem = db.prepare(`
-//     INSERT INTO orders_items (productId, quantity, price, orderId)
-//     VALUES (@productId, @quantity, @price, @orderId);
-//   `);
-
-//   // Обновление количества товаров в products
-//   // const updateProduct = db.prepare(`
-//   //   UPDATE products
-//   //   SET count = count - @quantity
-//   //   WHERE id = @productId;
-//   // `);
-
-//   // Вставляем каждую позицию в order_items и обновляем количество продуктов
-//   for (const item of data.orderItems) {
-//     insertItem.run({
-//       ...item,
-//       orderId, // Вставляем ID созданного заказа
-//     });
-//     // updateProduct.run({
-//     //   productId: item.productId,
-//     //   quantity: item.quantity,
-//     // });
-//   }
-
-//   db.close();
-
-//   return orderId;
-// };
 
 export const saveOrder = (data: SaveOrderData) => {
   const db = connect();
@@ -162,4 +119,68 @@ export const getOpenOrders = () => {
   db.close();
 
   return ordersWithItems as OrderDbItemWithOrderItems[];
+};
+
+export const closeOrder = (data: SaveOrderData) => {
+  const db = connect();
+
+  // Проверка существования заказа
+  const existingOrderQuery = db.prepare(`
+    SELECT id FROM orders WHERE number = ? AND status = 'open';
+  `);
+  const existingOrder = existingOrderQuery.get(data.number) as
+    | { id: number }
+    | undefined;
+
+  if (!existingOrder) {
+    db.close();
+    throw new Error('Заказ не сохранен! Оплата невозможна!');
+  }
+
+  // Обновление заказа: статус на 'closed' и метод оплаты
+  const updateOrderQuery = db.prepare(`
+    UPDATE orders SET
+      createdAt = @createdAt,
+      totalAmount = @totalAmount,
+      discountId = @discountId,
+      discountTotalAmount = @discountTotalAmount,
+      paymentTypeId = @paymentTypeId,  -- запись типа оплаты
+      table_id = @table_id,
+      client = @client,
+      created_by = @created_by,
+      status = 'closed'
+    WHERE id = @id;
+  `);
+
+  updateOrderQuery.run({ ...data, id: existingOrder.id });
+
+  // Обновление позиций заказа
+  const insertItem = db.prepare(`
+    INSERT INTO orders_items (productId, quantity, price, orderId)
+    VALUES (@productId, @quantity, @price, @orderId);
+  `);
+  const updateItem = db.prepare(`
+    UPDATE orders_items SET
+      quantity = @quantity,
+      price = @price
+    WHERE orderId = @orderId AND productId = @productId;
+  `);
+  const existingItemsQuery = db.prepare(`
+    SELECT * FROM orders_items WHERE orderId = ? AND productId = ?;
+  `);
+
+  for (const item of data.orderItems) {
+    const existingItem = existingItemsQuery.get(
+      existingOrder.id,
+      item.productId,
+    );
+    if (existingItem) {
+      updateItem.run({ ...item, orderId: existingOrder.id });
+    } else {
+      insertItem.run({ ...item, orderId: existingOrder.id });
+    }
+  }
+
+  db.close();
+  return existingOrder.id;
 };
