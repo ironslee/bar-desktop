@@ -62,3 +62,7 @@ export interface SaveOrderData {
   status: OrderStatus.OPEN | OrderStatus.CLOSED; // Статус заказа
   orderItems: OrderItemData[]; // Позиции заказа (товары)
 }
+
+export interface CloseOrderData extends SaveOrderData {
+  paymentType: 0 | 1;
+}

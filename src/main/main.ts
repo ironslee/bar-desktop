@@ -23,6 +23,7 @@ import {
   MENU_GET_PRODUCT_BY_ID,
   MENU_GET_PRODUCTS_BY_CATEGORY,
   OPEN_ROUTE,
+  ORDER_CLOSE,
   ORDER_GET_OPEN,
   ORDER_SAVE,
   PRINT_CHECK,
@@ -42,8 +43,8 @@ import {
 import { getClientById, getClients } from './services/clients.service';
 import { KitchenTicket, PreCheck } from '../renderer/types/Print';
 import { printCheck, printKitchenTicket } from './services/print.service';
-import { SaveOrderData } from '../renderer/types/Order';
-import { getOpenOrders, saveOrder } from './services/order.service';
+import { CloseOrderData, SaveOrderData } from '../renderer/types/Order';
+import { closeOrder, getOpenOrders, saveOrder } from './services/order.service';
 
 class AppUpdater {
   constructor() {
@@ -194,6 +195,9 @@ app
     });
     ipcMain.handle(ORDER_GET_OPEN, async () => {
       return getOpenOrders();
+    });
+    ipcMain.handle(ORDER_CLOSE, async (_, data: SaveOrderData) => {
+      return closeOrder(data);
     });
 
     // Menu methods

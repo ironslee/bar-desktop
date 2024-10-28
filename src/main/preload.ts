@@ -9,6 +9,7 @@ import {
   MENU_GET_PRODUCT_BY_ID,
   MENU_GET_PRODUCTS_BY_CATEGORY,
   OPEN_ROUTE,
+  ORDER_CLOSE,
   ORDER_GET_OPEN,
   ORDER_SAVE,
   PRINT_CHECK,
@@ -21,7 +22,7 @@ import { getClientById, getClients } from './services/clients.service';
 import { getAllProducts } from './services/menu.service';
 import { KitchenTicket, PreCheck } from '../renderer/types/Print';
 import { printCheck, printKitchenTicket } from './services/print.service';
-import { SaveOrderData } from '../renderer/types/Order';
+import { CloseOrderData, SaveOrderData } from '../renderer/types/Order';
 import { saveOrder } from './services/order.service';
 import { getUserById } from './services/users.service';
 
@@ -59,6 +60,7 @@ const electronHandler = {
   getClientById: (clientId: number) =>
     ipcRenderer.invoke(CLIENTS_GET_BY_ID, clientId),
   saveOrder: (data: SaveOrderData) => ipcRenderer.invoke(ORDER_SAVE, data),
+  closeOrder: (data: SaveOrderData) => ipcRenderer.invoke(ORDER_CLOSE, data),
   getOpenOrders: () => ipcRenderer.invoke(ORDER_GET_OPEN),
   printKitchenTicket: (kitchenTicket: KitchenTicket): Promise<boolean> =>
     ipcRenderer.invoke(PRINT_KITCHEN_TICKET, kitchenTicket),

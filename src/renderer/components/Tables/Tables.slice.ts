@@ -12,7 +12,7 @@ interface TableOrder {
   tableId: number;
   checkNumber?: number;
   orderItems?: OrderItem[];
-  orderDiscount?: number;
+  orderDiscount: number;
   orderClient?: ClientItem | null;
   orderUser?: UserItem | null;
 }
@@ -54,6 +54,7 @@ export const tablesSlice = createSlice({
         state.tableOrders.push({
           tableId: selectedTable.id,
           checkNumber: newOrderId,
+          orderDiscount: 0,
         });
       }
 
@@ -71,8 +72,14 @@ export const tablesSlice = createSlice({
         checkNumber?: number;
       }>,
     ) {
-      const { tableId, orderItems, orderClient, orderDiscount, orderUser, checkNumber } =
-        action.payload;
+      const {
+        tableId,
+        orderItems,
+        orderClient,
+        orderDiscount,
+        orderUser,
+        checkNumber,
+      } = action.payload;
 
       // Поиск заказа для стола
       let tableOrder = state.tableOrders.find(
@@ -99,7 +106,9 @@ export const tablesSlice = createSlice({
           return {
             ...newItem,
             // printedQuantity: existingItem ? existingItem.printedQuantity : 0,
-            printedQuantity: existingItem ? existingItem.printedQuantity : newItem.printedQuantity ?? 0,
+            printedQuantity: existingItem
+              ? existingItem.printedQuantity
+              : (newItem.printedQuantity ?? 0),
           };
         });
         tableOrder.orderDiscount = orderDiscount;

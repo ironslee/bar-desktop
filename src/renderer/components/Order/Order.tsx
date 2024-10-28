@@ -291,10 +291,10 @@ const Order = (): JSX.Element => {
           <Button onClick={handlePrintPreCheck} type="default">
             Пред печать
           </Button>
-          {/* <Payment
+          <Payment
             isPaymentOpen={isPaymentOpen}
             onChangeModal={onChangePaymentModal}
-          /> */}
+          />
         </Row>
       </Card>
     </>
