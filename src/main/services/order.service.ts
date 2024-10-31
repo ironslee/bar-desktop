@@ -50,6 +50,11 @@ export const saveOrder = (data: SaveOrderData) => {
     `);
 
     orderId = orderQuery.run(data).lastInsertRowid;
+
+    const updateNumberQuery = db.prepare(`
+      UPDATE orders SET number = ? WHERE id = ?;
+    `);
+    updateNumberQuery.run(orderId, orderId);
   }
 
   // Вставка или обновление позиций заказа

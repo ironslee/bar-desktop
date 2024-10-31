@@ -52,7 +52,12 @@ const Tables = ({ onChangeModal, isTablesOpen }: TablesProps): JSX.Element => {
     dispatch(selectTable(id));
     if (tableOrder) {
       dispatch(addItemsFromTableOrder(tableOrder.orderItems ?? []));
-      if (tableOrder.orderClient) {
+      if (
+        tableOrder.orderClient === null ||
+        tableOrder.orderClient === undefined
+      ) {
+        dispatch(addClientFromTableOrder(null));
+      } else {
         dispatch(addClientFromTableOrder(tableOrder.orderClient ?? null));
       }
       if (tableOrder.orderUser) {

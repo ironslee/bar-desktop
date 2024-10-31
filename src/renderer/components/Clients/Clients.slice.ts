@@ -26,7 +26,7 @@ export const clientsSlice = createSlice({
         state.clients.find((client) => client.id === clientId) || null;
     },
 
-    addClientFromTableOrder(state, action: PayloadAction<ClientItem>) {
+    addClientFromTableOrder(state, action: PayloadAction<ClientItem | null>) {
       state.selectedClient = action.payload;
     },
 
@@ -36,6 +36,10 @@ export const clientsSlice = createSlice({
   },
 });
 
-export const { setClients, selectClient, addClientFromTableOrder, clearClient } =
-  clientsSlice.actions;
+export const {
+  setClients,
+  selectClient,
+  addClientFromTableOrder,
+  clearClient,
+} = clientsSlice.actions;
 export default clientsSlice.reducer;

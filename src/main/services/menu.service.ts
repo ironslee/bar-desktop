@@ -7,7 +7,7 @@ export const getCategories = (): CategoryItem[] => {
 
   const categoriesQuery = db.prepare(
     `
-      SELECT id, name, link
+      SELECT id, name, link, print_cat
       FROM categories;
     `,
   );

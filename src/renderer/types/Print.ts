@@ -1,8 +1,9 @@
-import { OrderItem } from "./Order";
+import { OrderItem } from './Order';
 
 export interface KitchenTicketItem {
   name: string;
   quantity: number;
+  print_category: string;
 }
 
 export interface KitchenTicket {

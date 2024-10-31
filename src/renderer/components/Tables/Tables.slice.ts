@@ -14,7 +14,7 @@ interface TableOrder {
   orderItems?: OrderItem[];
   orderDiscount: number;
   orderClient?: ClientItem | null;
-  orderUser?: UserItem | null;
+  orderUser?: UserItem;
 }
 
 interface TablesState {
@@ -50,10 +50,10 @@ export const tablesSlice = createSlice({
 
       if (selectedTable && !selectedTableOrder) {
         // Генерация номера чека
-        const newOrderId = Math.floor(Math.random() * 1000);
+        // const newOrderId = Math.floor(Math.random() * 1000);
         state.tableOrders.push({
           tableId: selectedTable.id,
-          checkNumber: newOrderId,
+          // checkNumber: newOrderId,
           orderDiscount: 0,
         });
       }
@@ -67,7 +67,7 @@ export const tablesSlice = createSlice({
         tableId: number;
         orderItems: OrderItem[];
         orderUser: UserItem;
-        orderClient?: ClientItem;
+        orderClient: ClientItem | null;
         orderDiscount: number;
         checkNumber?: number;
       }>,
@@ -92,13 +92,22 @@ export const tablesSlice = createSlice({
           orderItems: [],
           orderDiscount: 0,
           orderClient: null,
-          orderUser: null,
-          checkNumber: checkNumber ?? 0,
+          orderUser,
+          checkNumber: undefined,
         };
         state.tableOrders.push(tableOrder); // Добавляем новый заказ в tableOrders
       }
 
       if (tableOrder) {
+        if (
+          tableOrder.orderClient === undefined ||
+          tableOrder.orderClient === null
+        ) {
+          tableOrder.orderClient = null; // Сбрасываем клиента
+        } else {
+          tableOrder.orderClient = orderClient; // Устанавливаем нового клиента
+        }
+
         tableOrder.orderItems = orderItems.map((newItem) => {
           const existingItem = tableOrder.orderItems?.find(
             (item) => item.product.id === newItem.product.id,
@@ -112,9 +121,14 @@ export const tablesSlice = createSlice({
           };
         });
         tableOrder.orderDiscount = orderDiscount;
-        tableOrder.orderClient = orderClient;
+        // tableOrder.orderClient = orderClient;
+        if (orderClient !== undefined || orderClient !== null) {
+          tableOrder.orderClient = orderClient;
+        }
         tableOrder.orderUser = orderUser;
-        tableOrder.checkNumber = checkNumber ?? tableOrder.checkNumber;
+        if (checkNumber !== undefined) {
+          tableOrder.checkNumber = checkNumber;
+        }
       }
     },
 

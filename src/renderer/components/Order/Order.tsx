@@ -60,6 +60,9 @@ const Order = (): JSX.Element => {
   const tableOrder = useAppSelector((state) =>
     state.tablesStore.tableOrders.find((order) => order.tableId === tableId),
   );
+  const categories = useAppSelector(
+    (state: RootState) => state.menuStore.categories,
+  );
 
   const [isDiscountOpen, setIsDiscountOpen] = useState(false);
   const onChangeDiscountModal = () => {
@@ -80,7 +83,7 @@ const Order = (): JSX.Element => {
         syncTableOrder({
           tableId,
           orderItems,
-          orderClient: orderClient || undefined,
+          orderClient: orderClient || null,
           orderDiscount: discount,
           orderUser,
         }),
@@ -112,10 +115,16 @@ const Order = (): JSX.Element => {
       // Фильтруем элементы с quantity > 0
       const kitchenTicketItems: KitchenTicketItem[] = tableOrderItems
         .filter((item) => item.quantity - item.printedQuantity > 0)
-        .map((item) => ({
-          name: item.product.name,
-          quantity: item.quantity - item.printedQuantity,
-        }));
+        .map((item) => {
+          const category = categories.find(
+            (cat) => cat.id === item.product.categoryId,
+          );
+          return {
+            name: item.product.name,
+            quantity: item.quantity - item.printedQuantity,
+            print_category: category ? category.print_cat : '',
+          };
+        });
 
       // Обновляем kitchenTicket с учетом новых элементов
       setKitchenTicket({
@@ -174,12 +183,11 @@ const Order = (): JSX.Element => {
           price: item.product.retprice,
         }));
 
-      console.log('SEND TO PRINT: ', itemsToPrint);
       dispatch(savePrintedItems({ tableId, printedItems: itemsToPrint }));
       try {
         if (kitchenTicket && kitchenTicket.items.length > 0) {
           const newOrder = {
-            number: tableOrder?.checkNumber ?? 0, // Номер чека
+            number: undefined, // Номер чека
             createdAt: new Date().toISOString(), // Дата создания
             totalAmount, // Общая сумма заказа
             discountId: discount, // скдика
@@ -197,6 +205,18 @@ const Order = (): JSX.Element => {
 
           // Сохраняем заказ в базе данных
           const orderId = await window.electron.saveOrder(newOrder);
+          if (orderUser) {
+            dispatch(
+              syncTableOrder({
+                tableId,
+                orderItems,
+                orderClient: orderClient || null,
+                orderDiscount: discount,
+                orderUser,
+                checkNumber: orderId,
+              }),
+            );
+          }
 
           await window.electron.printKitchenTicket(kitchenTicket);
           setKitchenTicket((prevState) => ({
