@@ -10,9 +10,6 @@ import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { OrderDbItemWithOrderItems, OrderItem } from '../../types/Order';
 import { ProductItem } from '../../types/Product';
 
-const { Header, Sider, Content } = Layout;
-const { Text } = Typography;
-
 const MainPage = () => {
   const [isTablesOpen, setIsTablesOpen] = useState(false);
   const [isUsersOpen, setIsUsersOpen] = useState(false);
@@ -40,7 +37,7 @@ const MainPage = () => {
   useEffect(() => {
     const fetchOpenOrders = async () => {
       try {
-        const openOrders = await window.electron.getOpenOrders(); // Получаем открытые заказы через ipcRenderer
+        const openOrders = await window.electron.getOpenOrders();
         console.log('openOrderss: ', openOrders);
         if (openOrders && openOrders.length > 0) {
           // Маппим заказы и создаем массив промисов
@@ -62,10 +59,10 @@ const MainPage = () => {
 
                   // Преобразуем dbItem в OrderItem
                   return {
-                    product, // Информация о продукте
+                    product,
                     quantity: item.quantity,
-                    totalPrice: item.price, // Используем цену из базы данных
-                    printedQuantity: item.quantity, // Значение по умолчанию, если нет данных
+                    totalPrice: item.price * item.quantity,
+                    printedQuantity: item.quantity,
                   };
                 }),
               );
@@ -76,25 +73,23 @@ const MainPage = () => {
                 syncTableOrder({
                   tableId: order.table_id,
                   orderItems,
-                  orderClient, // Клиент заказа, если был найден
-                  orderDiscount: order.discountId, // Скидка
-                  orderUser, // Пользователь заказа, если был найден
+                  orderClient,
+                  orderDiscount: order.discountId,
+                  orderUser,
                   checkNumber: order.number,
                 }),
               );
-              console.log('tableOrder after sync: ', tableOrders);
             },
           );
 
           // Ждем завершения всех промисов
           await Promise.all(orderPromises);
         }
-        console.log('tableOrder after sync2: ', tableOrders);
 
-        // const openOrders = await window.electron.getOpenOrders(); // Вызов ipcRenderer метода
+        // const openOrders = await window.electron.getOpenOrders();
         // console.log('openOrderss: ', openOrders);
         // if (openOrders.length > 0) {
-        //   dispatch(syncTableOrder(openOrders)); // Синхронизация данных
+        //   dispatch(syncTableOrder(openOrders));
         // }
         // if (openOrders && openOrders.length > 0) {
         //   openOrders.forEach((order: any) => {
@@ -102,21 +97,20 @@ const MainPage = () => {
         //     dispatch(
         //       syncTableOrder({
         //         tableId: order.tableId,
-        //         orderItems: order.orderItems, // Товары заказа
-        //         orderClient: order.orderClient, // Клиент заказа
-        //         orderDiscount: order.orderDiscount, // Скидка
-        //         orderUser: order.orderUser, // Пользователь
+        //         orderItems: order.orderItems,
+        //         orderClient: order.orderClient,
+        //         orderDiscount: order.orderDiscount,
+        //         orderUser: order.orderUser,
         //       }),
         //     );
         //   });
         // }
       } catch (error) {
-        console.error('Ошибка при получении открытых заказов:', error);
         message.error('Ошибка при получении открытых заказов');
       }
     };
     console.log('openOrders');
-    fetchOpenOrders(); // Вызываем при монтировании компонента
+    fetchOpenOrders();
   }, [dispatch]);
 
   return (

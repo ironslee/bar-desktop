@@ -50,7 +50,7 @@ export interface OrderItemData {
 }
 
 export interface SaveOrderData {
-  number: number; // Номер чека
+  number?: number; // Номер чека
   createdAt: string; // Дата создания
   totalAmount: number; // Общая сумма заказа
   discountId: number | null; // ID скидки, если есть
