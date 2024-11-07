@@ -1,15 +1,15 @@
 .tableStyle {
-  font-size: 12px; // Маленький текст для стиля чека
-  border-collapse: collapse; // Убираем зазоры между границами
-  width: 100%; // Таблица будет занимать всю ширину родителя
-  table-layout: auto; // Автоматическая ширина колонок по содержимому
+  font-size: 12px;
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: auto;
 }
 
 .cellStyle {
   padding: 0px 2px;
   border: 1px solid black;
   text-align: left;
-  max-width: 200px; // Ограничение ширины колонок
-  overflow: hidden; // Скрываем переполнение
-  text-overflow: ellipsis; // Если текст слишком длинный, ставим троеточие
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

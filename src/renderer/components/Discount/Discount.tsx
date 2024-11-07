@@ -122,7 +122,7 @@ const Discount = ({ onChangeModal, isOpen }: DiscountProps): JSX.Element => {
       <Button
         type="primary"
         onClick={() => onChangeModal()}
-        style={{ maxWidth: 150 }}
+        style={{ width: '100%', fontSize: '17px' }}
       >
         {`Скидка ${selectedDiscount ? selectedDiscount?.discount_value : 0}%`}
       </Button>

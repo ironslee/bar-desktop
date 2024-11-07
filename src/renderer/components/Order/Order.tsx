@@ -1,5 +1,6 @@
+import './order.scss';
 import React, { useEffect, useState } from 'react';
-import { Button, Row, Col, Card, Typography, Flex } from 'antd';
+import { Button, Row, Col, Card, Typography, Flex, Divider } from 'antd';
 import { DeleteOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { RootState } from '../../app/providers/StoreProvider';
 import {
@@ -86,10 +87,6 @@ const Order = (): JSX.Element => {
   };
 
   useEffect(() => {
-    console.log('items from OrderStore', items);
-  }, [items]);
-
-  useEffect(() => {
     if (tableId && orderUser) {
       dispatch(
         syncTableOrder({
@@ -168,8 +165,6 @@ const Order = (): JSX.Element => {
         table: selectedTable.name,
       });
     }
-
-    console.log('kitchenTicket: ', kitchenTicket);
   }, [items, tableOrderItems]);
 
   const handleAdd = (productId: number) => {
@@ -201,8 +196,6 @@ const Order = (): JSX.Element => {
       if (preCheck) {
         await window.electron.printCheck(preCheck);
       }
-
-      console.log(preCheck);
     } catch (error) {
       console.log(error);
     }
@@ -269,89 +262,122 @@ const Order = (): JSX.Element => {
 
   return (
     <>
-      <Card style={{ padding: '20px' }}>
-        {items.map((item: OrderItem) => (
-          <Flex
-            key={item.product.id}
-            style={{
-              marginBottom: '10px',
-              border: '1px solid #D3D3D3',
-              borderRadius: '10px',
-              padding: '15px',
-            }}
-          >
-            <Row
-              justify="space-between"
-              align="middle"
-              gutter={5}
-              style={{ minWidth: '400px' }}
+      <Card style={{ padding: '0px', minHeight: '500px', alignItems: 'start' }}>
+        {/* <div style={{ width: '100%' }}> */}
+        <Row className="order_row items_row">
+          {items.map((item: OrderItem) => (
+            <Flex
+              key={item.product.id}
+              style={{
+                marginBottom: '4px',
+                border: '1px solid #D3D3D3',
+                borderRadius: '10px',
+                padding: '8px 8px',
+                width: '100%',
+                height: '100%',
+              }}
             >
-              <Col span={8}>{item.product.name}</Col>
-              <Col span={6}>
-                <Flex align="center">
+              <Row
+                justify="space-between"
+                align="middle"
+                gutter={10}
+                style={{ width: '96%', lineHeight: '1.3' }}
+              >
+                <Col span={8} style={{ fontSize: '14px' }}>
+                  {item.product.name}
+                </Col>
+                <Col span={6}>
+                  <Flex align="center" justify="center">
+                    <Button
+                      type="text"
+                      onClick={() => handleRemove(item.product.id)}
+                      icon={<MinusOutlined style={{ color: colors.primary }} />}
+                      style={{ borderRadius: '30px' }}
+                    />
+                    <Typography.Text
+                      style={{ minWidth: '20px', textAlign: 'center' }}
+                    >
+                      {item.quantity}
+                    </Typography.Text>
+                    <Button
+                      type="text"
+                      onClick={() => handleAdd(item.product.id)}
+                      icon={<PlusOutlined style={{ color: colors.primary }} />}
+                      style={{ borderRadius: '30px' }}
+                    />
+                  </Flex>
+                </Col>
+                <Col span={4}>{item.product.retprice}</Col>
+                <Col span={4}>{item.totalPrice}</Col>
+                <Col span={1}>
                   <Button
                     type="text"
-                    onClick={() => handleRemove(item.product.id)}
-                    icon={<MinusOutlined style={{ color: colors.primary }} />}
+                    danger
+                    onClick={() => handleDelete(item.product.id)}
+                    icon={
+                      <DeleteOutlined style={{ color: 'var(--error-color)' }} />
+                    }
                     style={{ borderRadius: '30px' }}
                   />
-                  <Typography.Text>{item.quantity}</Typography.Text>
-                  <Button
-                    type="text"
-                    onClick={() => handleAdd(item.product.id)}
-                    icon={<PlusOutlined style={{ color: colors.primary }} />}
-                    style={{ borderRadius: '30px' }}
-                  />
-                </Flex>
-              </Col>
-              <Col span={4}>{item.product.retprice}</Col>
-              <Col span={4}>{item.totalPrice}</Col>
-              <Col span={2}>
-                <Button
-                  type="text"
-                  danger
-                  onClick={() => handleDelete(item.product.id)}
-                  icon={
-                    <DeleteOutlined style={{ color: 'var(--error-color)' }} />
-                  }
-                  style={{ borderRadius: '30px' }}
-                />
-              </Col>
-            </Row>
-          </Flex>
-        ))}
+                </Col>
+              </Row>
+            </Flex>
+          ))}
+        </Row>
+        {/* </div> */}
+        <div style={{ marginTop: 'auto' }}>
+          <Divider />
+          <Row className="order_row">
+            <Col>
+              {' '}
+              <Clients onChangeModal={onChangeModal} isOpen={isOpen} />
+            </Col>
+            <Col>
+              <Discount
+                onChangeModal={onChangeDiscountModal}
+                isOpen={isDiscountOpen}
+              />
+            </Col>
+          </Row>
 
-        <Row justify="center" style={{ marginTop: '20px' }}>
-          <Clients onChangeModal={onChangeModal} isOpen={isOpen} />
-        </Row>
+          <Row className="order_row">
+            <Col>
+              {' '}
+              <Title level={4} style={{ marginBottom: '0' }}>
+                К оплате:
+              </Title>
+            </Col>
+            <Col>
+              <Title
+                level={4}
+                style={{ marginBottom: '0' }}
+              >{`${selectedDiscount !== null && selectedDiscount !== undefined ? totalAmount - (totalAmount / 100) * selectedDiscount.discount_value : totalAmount} тенге`}</Title>
+            </Col>
+          </Row>
 
-        <Row justify="end" style={{ marginTop: '20px' }}>
-          <Col>
-            <Title
-              level={5}
-            >{`К оплате: ${selectedDiscount !== null && selectedDiscount !== undefined ? totalAmount - (totalAmount / 100) * selectedDiscount.discount_value : totalAmount} тенге`}</Title>
-          </Col>
-        </Row>
-        <Row>
-          <Discount
-            onChangeModal={onChangeDiscountModal}
-            isOpen={isDiscountOpen}
-          />
-        </Row>
-        <Row>
-          <Button onClick={handlePrintKitchenTicket} type="primary">
-            Бегунок
-          </Button>
-        </Row>
-        <Row justify="space-between" style={{ marginTop: '20px' }}>
-          <Button onClick={handlePrintPreCheck} type="default">
-            Пред печать
-          </Button>
-          <Payment
-            isPaymentOpen={isPaymentOpen}
-            onChangeModal={onChangePaymentModal}
-          />
-        </Row>
+          <Row className="order_row">
+            <Button
+              onClick={handlePrintKitchenTicket}
+              type="primary"
+              style={{ width: '100%', fontSize: '18px' }}
+            >
+              Бегунок
+            </Button>
+          </Row>
+          <Row className="order_row">
+            <Button
+              onClick={handlePrintPreCheck}
+              type="default"
+              style={{ fontSize: '18px' }}
+            >
+              Пред печать
+            </Button>
+            <Payment
+              isPaymentOpen={isPaymentOpen}
+              onChangeModal={onChangePaymentModal}
+            />
+          </Row>
+        </div>
       </Card>
     </>
   );

@@ -1,3 +1,4 @@
+import './users.scss';
 import { useEffect, useState } from 'react';
 import { Button, Card, Col, Flex, Modal, Row, Typography, message } from 'antd';
 import { useAppSelector } from '../../hooks/useAppSelector';
@@ -44,7 +45,8 @@ const Users = ({ onChangeModal, isUsersOpen }: UsersProps): JSX.Element => {
       <Button
         type="primary"
         onClick={() => onChangeModal()}
-        style={{ maxWidth: 150 }}
+        // style={{ maxWidth: 150 }}
+        className={selectedUser ? 'button_small' : 'button_large'}
       >
         {selectedUser ? selectedUser.name : 'Выберите официанта'}
       </Button>
