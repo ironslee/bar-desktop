@@ -18,6 +18,11 @@ import { getTables } from './services/tables.service';
 import {
   CLIENTS_GET,
   CLIENTS_GET_BY_ID,
+  CLIENTS_UPDATE_OPEN_ORDER,
+  DISCOUNT_GET,
+  DISCOUNT_GET_BY_ID,
+  DISCOUNT_GET_ORDER_DISCOUNT,
+  DISCOUNT_UPDATE_OPEN_ORDER,
   MENU_GET_ALL_PRODUCTS,
   MENU_GET_CATEGORIES,
   MENU_GET_PRODUCT_BY_ID,
@@ -40,11 +45,21 @@ import {
   getProductById,
   getProductsByCategory,
 } from './services/menu.service';
-import { getClientById, getClients } from './services/clients.service';
+import {
+  getClientById,
+  getClients,
+  updateOpenOrderClient,
+} from './services/clients.service';
 import { KitchenTicket, PreCheck } from '../renderer/types/Print';
 import { printCheck, printKitchenTicket } from './services/print.service';
 import { CloseOrderData, SaveOrderData } from '../renderer/types/Order';
 import { closeOrder, getOpenOrders, saveOrder } from './services/order.service';
+import {
+  getDiscount,
+  getDiscountById,
+  getDiscountByOrderId,
+  updateOpenOrderDiscount,
+} from './services/discount.service';
 
 class AppUpdater {
   constructor() {
@@ -188,6 +203,28 @@ app
     ipcMain.handle(CLIENTS_GET_BY_ID, async (_, clientId: number) => {
       return getClientById(clientId);
     });
+    ipcMain.handle(
+      CLIENTS_UPDATE_OPEN_ORDER,
+      async (_, clientId: number, orderNumber: number) => {
+        return updateOpenOrderClient(clientId, orderNumber);
+      },
+    );
+
+    ipcMain.handle(DISCOUNT_GET, async () => {
+      return getDiscount();
+    });
+    ipcMain.handle(DISCOUNT_GET_ORDER_DISCOUNT, async (_, number: number) => {
+      return getDiscountByOrderId(number);
+    });
+    ipcMain.handle(DISCOUNT_GET_BY_ID, async (_, id: number) => {
+      return getDiscountById(id);
+    });
+    ipcMain.handle(
+      DISCOUNT_UPDATE_OPEN_ORDER,
+      async (_, discountId: number | null, orderNumber: number) => {
+        return updateOpenOrderDiscount(discountId, orderNumber);
+      },
+    );
 
     //Order methods
     ipcMain.handle(ORDER_SAVE, async (_, data: SaveOrderData) => {

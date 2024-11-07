@@ -63,7 +63,19 @@ const Tables = ({ onChangeModal, isTablesOpen }: TablesProps): JSX.Element => {
       if (tableOrder.orderUser) {
         dispatch(addUserFromTableOrder(tableOrder.orderUser ?? null));
       }
-      dispatch(addDiscountFromTableOrder(tableOrder.orderDiscount ?? 0));
+      // dispatch(
+      //   addDiscountFromTableOrder(
+      //     tableOrder.orderDiscount ? tableOrder.orderDiscount : null,
+      //   ),
+      // );
+      if (
+        tableOrder.orderDiscount === null ||
+        tableOrder.orderDiscount === undefined
+      ) {
+        dispatch(addDiscountFromTableOrder(null));
+      } else {
+        dispatch(addDiscountFromTableOrder(tableOrder.orderDiscount ?? null));
+      }
     }
     if (!tableOrder) {
       dispatch(clearOrder());

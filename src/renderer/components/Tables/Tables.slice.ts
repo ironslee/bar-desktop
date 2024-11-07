@@ -3,6 +3,7 @@ import { TableItem, TableStatus } from '../../types/Table';
 import { OrderItem } from '../../types/Order';
 import { ClientItem } from '../../types/Client';
 import { UserItem } from '../../types/User';
+import { DiscountItem } from '../../types/Discount';
 
 // interface OrderItemPrinted extends OrderItem {
 //   printedQuantity?: number;
@@ -12,7 +13,7 @@ interface TableOrder {
   tableId: number;
   checkNumber?: number;
   orderItems?: OrderItem[];
-  orderDiscount: number;
+  orderDiscount: DiscountItem | null;
   orderClient?: ClientItem | null;
   orderUser?: UserItem;
 }
@@ -54,7 +55,7 @@ export const tablesSlice = createSlice({
         state.tableOrders.push({
           tableId: selectedTable.id,
           // checkNumber: newOrderId,
-          orderDiscount: 0,
+          orderDiscount: null,
         });
       }
 
@@ -68,7 +69,7 @@ export const tablesSlice = createSlice({
         orderItems: OrderItem[];
         orderUser: UserItem;
         orderClient: ClientItem | null;
-        orderDiscount: number;
+        orderDiscount: DiscountItem | null;
         checkNumber?: number;
       }>,
     ) {
@@ -90,7 +91,7 @@ export const tablesSlice = createSlice({
         tableOrder = {
           tableId,
           orderItems: [],
-          orderDiscount: 0,
+          orderDiscount: null,
           orderClient: null,
           orderUser,
           checkNumber: undefined,
@@ -108,6 +109,15 @@ export const tablesSlice = createSlice({
           tableOrder.orderClient = orderClient; // Устанавливаем нового клиента
         }
 
+        if (
+          tableOrder.orderDiscount === undefined ||
+          tableOrder.orderDiscount === null
+        ) {
+          tableOrder.orderDiscount = null;
+        } else {
+          tableOrder.orderDiscount = orderDiscount;
+        }
+
         tableOrder.orderItems = orderItems.map((newItem) => {
           const existingItem = tableOrder.orderItems?.find(
             (item) => item.product.id === newItem.product.id,
@@ -120,10 +130,14 @@ export const tablesSlice = createSlice({
               : (newItem.printedQuantity ?? 0),
           };
         });
-        tableOrder.orderDiscount = orderDiscount;
+
+        // tableOrder.orderDiscount = orderDiscount;
         // tableOrder.orderClient = orderClient;
         if (orderClient !== undefined || orderClient !== null) {
           tableOrder.orderClient = orderClient;
+        }
+        if (orderDiscount !== undefined || orderDiscount !== null) {
+          tableOrder.orderDiscount = orderDiscount;
         }
         tableOrder.orderUser = orderUser;
         if (checkNumber !== undefined) {

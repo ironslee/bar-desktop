@@ -34,3 +34,17 @@ export const getClientById = (clientId: number): ClientItem => {
 
   return client as ClientItem;
 };
+
+export const updateOpenOrderClient = (clientId: number, orderNumber: number) => {
+  const db = connect();
+
+  const updateClientQuery = db.prepare(`
+    UPDATE orders
+    SET client = ?
+    WHERE number = ? AND status = 'open';
+  `);
+
+  updateClientQuery.run(clientId, orderNumber);
+
+  db.close();
+};

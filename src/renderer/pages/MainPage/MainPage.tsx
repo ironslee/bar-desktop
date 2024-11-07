@@ -43,14 +43,19 @@ const MainPage = () => {
           // Маппим заказы и создаем массив промисов
           const orderPromises = openOrders.map(
             async (order: OrderDbItemWithOrderItems) => {
-              const [orderClient, orderUser] = await Promise.all([
-                order.client
-                  ? window.electron.getClientById(order.client)
-                  : Promise.resolve(undefined),
-                order.created_by
-                  ? window.electron.getUserById(order.created_by)
-                  : Promise.resolve(undefined),
-              ]);
+              const [orderClient, orderUser, orderDiscount] = await Promise.all(
+                [
+                  order.client
+                    ? window.electron.getClientById(order.client)
+                    : Promise.resolve(undefined),
+                  order.created_by
+                    ? window.electron.getUserById(order.created_by)
+                    : Promise.resolve(undefined),
+                  order.discountId
+                    ? window.electron.getDiscountById(order.discountId)
+                    : Promise.resolve(undefined),
+                ],
+              );
               const orderItems: OrderItem[] = await Promise.all(
                 order.items.map(async (item) => {
                   // Получаем информацию о продукте по productId
@@ -74,7 +79,7 @@ const MainPage = () => {
                   tableId: order.table_id,
                   orderItems,
                   orderClient,
-                  orderDiscount: order.discountId,
+                  orderDiscount,
                   orderUser,
                   checkNumber: order.number,
                 }),
@@ -137,7 +142,7 @@ const MainPage = () => {
             <>
               <Typography.Title
                 level={4}
-              >{`Чек ${tableOrder ? tableOrder.checkNumber : ''} стол ${selectedTable.name}`}</Typography.Title>
+              >{`Чек ${tableOrder?.checkNumber ?? ''} стол ${selectedTable.name}`}</Typography.Title>
 
               <Flex>
                 <Flex>
