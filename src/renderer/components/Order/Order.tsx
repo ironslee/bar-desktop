@@ -16,6 +16,11 @@ import { savePrintedItems, syncTableOrder } from '../Tables';
 import { Discount } from '../Discount';
 import { KitchenTicket, KitchenTicketItem, PreCheck } from '../../types/Print';
 import { Payment } from '../Payment';
+import { DiscountItem } from '../../types/Discount';
+import {
+  selectDiscount,
+  selectDiscountFromDb,
+} from '../Discount/Discount.slice';
 
 const { Title } = Typography;
 
@@ -27,11 +32,18 @@ const Order = (): JSX.Element => {
 
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 
+  const [discountFromDb, setDiscountFromDb] = useState<DiscountItem | null>(
+    null,
+  );
+
   const { items, totalAmount } = useAppSelector(
     (state: RootState) => state.orderStore,
   );
-  const { discount } = useAppSelector(
-    (state: RootState) => state.discountStore,
+  // const { selectedDiscount } = useAppSelector(
+  //   (state: RootState) => state.discountStore,
+  // );
+  const selectedDiscount = useAppSelector(
+    (state) => state.discountStore.selectedDiscount,
   );
   const tableId = useAppSelector(
     (state) => state.tablesStore.selectedTable?.id,
@@ -84,12 +96,36 @@ const Order = (): JSX.Element => {
           tableId,
           orderItems,
           orderClient: orderClient || null,
-          orderDiscount: discount,
+          orderDiscount: selectedDiscount || null,
           orderUser,
         }),
       );
     }
-  }, [tableId, orderItems, dispatch, discount, orderClient, orderUser]);
+  }, [tableId, orderItems, dispatch, selectedDiscount, orderClient, orderUser]);
+
+  // useEffect(() => {
+  //   const fetchDiscount = async () => {
+  //     try {
+  //       if (tableOrder?.checkNumber) {
+  //         const discountData = await window.electron.getDiscountByOrderId(
+  //           tableOrder.checkNumber,
+  //         );
+  //         setDiscountFromDb(discountData);
+  //       }
+  //     } catch (error) {
+  //       console.error(error);
+  //     }
+  //   };
+
+  //   if (tableOrder?.checkNumber) {
+  //     fetchDiscount();
+  //     console.log('discount From DB: ', discountFromDb);
+  //     if (discountFromDb?.id) {
+  //       dispatch(selectDiscountFromDb(discountFromDb));
+  //       console.log('selectedDIsc: ', selectedDiscount);
+  //     }
+  //   }
+  // }, [tableId, orderItems, dispatch, selectedDiscount, orderClient, orderUser]);
 
   useEffect(() => {
     if (
@@ -104,7 +140,7 @@ const Order = (): JSX.Element => {
         user: tableOrder.orderUser?.name || '',
         client: tableOrder.orderClient?.name || '',
         totalAmount,
-        discount,
+        discount: selectedDiscount?.discount_value ?? 0,
         items: tableOrderItems,
       });
     }
@@ -187,14 +223,14 @@ const Order = (): JSX.Element => {
       try {
         if (kitchenTicket && kitchenTicket.items.length > 0) {
           const newOrder = {
-            number: undefined, // Номер чека
+            number: tableOrder?.checkNumber ?? undefined, // Номер чека
             createdAt: new Date().toISOString(), // Дата создания
             totalAmount, // Общая сумма заказа
-            discountId: discount, // скдика
-            discountTotalAmount:
-              discount > 0
-                ? totalAmount - (totalAmount / 100) * discount
-                : totalAmount, // Сумма после скидки
+            discountId: selectedDiscount?.id || null, // скдика
+            discountTotalAmount: selectedDiscount
+              ? totalAmount -
+                (totalAmount / 100) * selectedDiscount.discount_value
+              : totalAmount, // Сумма после скидки
             paymentTypeId: null, // Тип оплаты
             table_id: tableId, // ID стола
             client: orderClient?.id || null, // Имя клиента
@@ -211,7 +247,7 @@ const Order = (): JSX.Element => {
                 tableId,
                 orderItems,
                 orderClient: orderClient || null,
-                orderDiscount: discount,
+                orderDiscount: selectedDiscount || null,
                 orderUser,
                 checkNumber: orderId,
               }),
@@ -293,7 +329,7 @@ const Order = (): JSX.Element => {
           <Col>
             <Title
               level={5}
-            >{`К оплате: ${discount > 0 ? totalAmount - (totalAmount / 100) * discount : totalAmount} тенге`}</Title>
+            >{`К оплате: ${selectedDiscount !== null && selectedDiscount !== undefined ? totalAmount - (totalAmount / 100) * selectedDiscount.discount_value : totalAmount} тенге`}</Title>
           </Col>
         </Row>
         <Row>

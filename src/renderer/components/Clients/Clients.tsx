@@ -17,6 +17,9 @@ const Clients = ({ onChangeModal, isOpen }: ClientsProps): JSX.Element => {
   const { selectedClient } = useAppSelector(
     (state: RootState) => state.clientsStore,
   );
+  const { tableOrders, selectedTable } = useAppSelector(
+    (state: RootState) => state.tablesStore,
+  );
   const [clientsState, setClientsState] = useState<ClientItem[]>([]);
   const [searchItem, setSearchItem] = useState<string>('');
   const [loading, setLoading] = useState(false);
@@ -25,7 +28,9 @@ const Clients = ({ onChangeModal, isOpen }: ClientsProps): JSX.Element => {
   const filteredClients = clientsState.filter((client) =>
     client.name.toLowerCase().includes(debouncedSearchItem.toLowerCase()),
   );
-
+  const tableOrder = tableOrders.find(
+    (order) => order.tableId === selectedTable?.id,
+  );
   const fetchClients = async () => {
     try {
       setLoading(true);
@@ -45,8 +50,19 @@ const Clients = ({ onChangeModal, isOpen }: ClientsProps): JSX.Element => {
     }
   }, [isOpen]);
 
-  const handleSelectClient = (record: ClientItem) => {
+  const handleSelectClient = async (record: ClientItem) => {
     dispatch(selectClient(record.id));
+    try {
+      // Здесь вызывается функция сервиса для проверки и обновления открытого заказа
+      if (tableOrder?.checkNumber) {
+        await window.electron.updateOpenOrderClient(
+          record.id,
+          tableOrder.checkNumber,
+        );
+      }
+    } catch {
+      // Ошибки обрабатываются без вывода сообщений
+    }
     onChangeModal();
   };
 
