@@ -54,7 +54,8 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
   );
   const discount = tableOrder?.orderDiscount; // Скидка
 
-  const amountToPay = totalAmount - (totalAmount / 100) * (discount || 0);
+  const amountToPay =
+    totalAmount - (totalAmount / 100) * (discount?.discount_value || 0);
   const paymentMethodValue = paymentMethod === 'cash' ? 0 : 1;
 
   const handlePaymentMethodChange = (e: any) => {
@@ -80,7 +81,7 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
 
         if (tableOrder?.orderItems) {
           orderItemsData = tableOrder.orderItems.map((item) => ({
-            productId: item.product.id, // Убедитесь, что у вас есть это свойство
+            productId: item.product.id,
             quantity: item.quantity,
             price: item.product.retprice,
             total: item.totalPrice,
@@ -91,7 +92,7 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
           number: tableOrder?.checkNumber ?? 0,
           createdAt: new Date().toISOString(),
           totalAmount,
-          discountId: tableOrder?.orderDiscount,
+          discountId: tableOrder?.orderDiscount?.id ?? null,
           discountTotalAmount: amountToPay,
           paymentTypeId: paymentMethodValue,
           table_id: tableOrder.tableId,
@@ -108,7 +109,7 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
           user: tableOrder.orderUser?.name ?? '',
           client: tableOrder.orderClient?.name ?? '',
           totalAmount,
-          discount: tableOrder.orderDiscount,
+          discount: tableOrder.orderDiscount?.discount_value ?? 0,
           items: tableOrder.orderItems ?? [],
         });
 
@@ -146,7 +147,11 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
 
   return (
     <>
-      <Button type="primary" onClick={() => onChangeModal()}>
+      <Button
+        type="primary"
+        onClick={() => onChangeModal()}
+        style={{ fontSize: '18px' }}
+      >
         Оплатить
       </Button>
       <Modal
@@ -164,7 +169,7 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
           {/* Левая часть - детали оплаты */}
           <Col span={12}>
             <div>
-              <Title level={5}>Скидка: {discount}%</Title>
+              <Title level={5}>Скидка: {discount?.discount_value}%</Title>
               <Title level={5}>Итого: {totalAmount} KZT</Title>
               <Title level={5}>Итого со скидкой: {amountToPay} KZT</Title>
               <Title level={5}>К оплате: {amountToPay} KZT</Title>
@@ -234,7 +239,9 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
                 </tbody>
               </table>
               <Divider />
-              <Text style={{ fontWeight: 'bold' }}>Скидка: {discount}%</Text>
+              <Text style={{ fontWeight: 'bold' }}>
+                Скидка: {discount?.discount_value}%
+              </Text>
               <br />
               <Text style={{ fontWeight: 'bold' }}>
                 ИТОГО: {totalAmount} тг

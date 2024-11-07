@@ -1,5 +1,6 @@
+import './tables.scss';
 import { useEffect, useState } from 'react';
-import { Button, Card, Col, Flex, Modal, Row, message } from 'antd';
+import { Button, Card, Col, Flex, Modal, Row, Typography, message } from 'antd';
 import { TableItem } from '../../types/Table';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
@@ -88,44 +89,46 @@ const Tables = ({ onChangeModal, isTablesOpen }: TablesProps): JSX.Element => {
 
   return (
     <>
-      <Button type="primary" onClick={() => onChangeModal()}>
+      <Button
+        type="primary"
+        onClick={() => onChangeModal()}
+        className={selectedTable ? 'button_small' : 'button_large'}
+      >
         {selectedTable ? selectedTable.name : 'Выберите стол'}
       </Button>
-      <Modal
-        title="Столы"
-        open={isTablesOpen}
-        footer={[]}
-        onCancel={onChangeModal}
-      >
-        <Flex
+      <Modal open={isTablesOpen} footer={[]} onCancel={onChangeModal}>
+        <Typography.Title level={3}>Выберите стол</Typography.Title>
+        {/* <Flex
+          gap="small"
+          wrap="wrap"
+          align="top"
           style={{
             width: '100%',
-            minHeight: 'calc(100vh - 48px)',
-            flexWrap: 'wrap',
-            gap: '16px',
+            minHeight: 'calc(100vh - 200px)',
           }}
-        >
-          <h2>Выберите стол</h2>
-          <Row gutter={[16, 16]}>
-            {tablesState.map((table) => (
-              <Col key={table.id} span={6}>
-                <Card
-                  hoverable
-                  onClick={() => handleSelectTable(table.id)}
-                  style={{
-                    backgroundColor: table.color,
-                    border:
-                      selectedTable?.id === table.id
-                        ? '3px solid green'
-                        : '1px solid gray',
-                  }}
-                >
-                  <Card.Meta title={table.name} />
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </Flex>
+        > */}
+        <Row gutter={[5, 5]} align="top">
+          {tablesState.map((table) => (
+            <Col key={table.id} span={8}>
+              <Card
+                hoverable
+                onClick={() => handleSelectTable(table.id)}
+                style={{
+                  backgroundColor: table.color ?? 'white',
+                  border:
+                    selectedTable?.id === table.id
+                      ? '3px solid #16C787'
+                      : '1px solid gray',
+                  fontWeight: selectedTable?.id === table.id ? '600' : '400',
+                }}
+                className="card"
+              >
+                {table.name}
+              </Card>
+            </Col>
+          ))}
+        </Row>
+        {/* </Flex> */}
       </Modal>
     </>
   );

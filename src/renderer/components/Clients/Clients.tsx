@@ -1,3 +1,4 @@
+import './clients.scss';
 import { useEffect, useState } from 'react';
 import { Button, Input, Modal, Table, message } from 'antd';
 import { useAppSelector } from '../../hooks/useAppSelector';
@@ -89,7 +90,7 @@ const Clients = ({ onChangeModal, isOpen }: ClientsProps): JSX.Element => {
       <Button
         type="primary"
         onClick={() => onChangeModal()}
-        style={{ maxWidth: 150 }}
+        style={{ width: '100%', fontSize: '17px' }}
       >
         {selectedClient ? `Клиент ${selectedClient.name}` : 'Клиент не выбран'}
       </Button>

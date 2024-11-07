@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Layout, Button, Typography, Flex, message } from 'antd';
+import { Layout, Button, Typography, Flex, message, Col, Row } from 'antd';
 import { syncTableOrder, Tables } from '../../components/Tables';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import { RootState } from '../../app/providers/StoreProvider';
@@ -40,7 +40,6 @@ const MainPage = () => {
         const openOrders = await window.electron.getOpenOrders();
         console.log('openOrderss: ', openOrders);
         if (openOrders && openOrders.length > 0) {
-          // Маппим заказы и создаем массив промисов
           const orderPromises = openOrders.map(
             async (order: OrderDbItemWithOrderItems) => {
               const [orderClient, orderUser, orderDiscount] = await Promise.all(
@@ -58,11 +57,9 @@ const MainPage = () => {
               );
               const orderItems: OrderItem[] = await Promise.all(
                 order.items.map(async (item) => {
-                  // Получаем информацию о продукте по productId
                   const product: ProductItem =
                     await window.electron.getProductById(item.productId);
 
-                  // Преобразуем dbItem в OrderItem
                   return {
                     product,
                     quantity: item.quantity,
@@ -71,9 +68,8 @@ const MainPage = () => {
                   };
                 }),
               );
-              console.log(': ', orderClient, orderUser, orderItems);
 
-              // Диспатчим каждый заказ
+              // Dispatch every order
               dispatch(
                 syncTableOrder({
                   tableId: order.table_id,
@@ -87,56 +83,36 @@ const MainPage = () => {
             },
           );
 
-          // Ждем завершения всех промисов
           await Promise.all(orderPromises);
         }
-
-        // const openOrders = await window.electron.getOpenOrders();
-        // console.log('openOrderss: ', openOrders);
-        // if (openOrders.length > 0) {
-        //   dispatch(syncTableOrder(openOrders));
-        // }
-        // if (openOrders && openOrders.length > 0) {
-        //   openOrders.forEach((order: any) => {
-        //     // Диспатчим каждый открытый заказ через syncTableOrder
-        //     dispatch(
-        //       syncTableOrder({
-        //         tableId: order.tableId,
-        //         orderItems: order.orderItems,
-        //         orderClient: order.orderClient,
-        //         orderDiscount: order.orderDiscount,
-        //         orderUser: order.orderUser,
-        //       }),
-        //     );
-        //   });
-        // }
       } catch (error) {
         message.error('Ошибка при получении открытых заказов');
       }
     };
-    console.log('openOrders');
     fetchOpenOrders();
   }, [dispatch]);
 
   return (
     <>
       <Flex>
-        <Flex vertical>
-          <Flex>
-            <Tables
-              onChangeModal={onChangeTablesModal}
-              isTablesOpen={isTablesOpen}
-            />
-          </Flex>
-
-          {selectedTable && (
+        <Flex vertical style={{ width: '100%' }}>
+          <Flex justify="left">
             <Flex>
-              <Users
-                onChangeModal={onChangeUsersModal}
-                isUsersOpen={isUsersOpen}
+              <Tables
+                onChangeModal={onChangeTablesModal}
+                isTablesOpen={isTablesOpen}
               />
             </Flex>
-          )}
+
+            {selectedTable && (
+              <Flex>
+                <Users
+                  onChangeModal={onChangeUsersModal}
+                  isUsersOpen={isUsersOpen}
+                />
+              </Flex>
+            )}
+          </Flex>
 
           {selectedTable && selectedUser && (
             <>
@@ -144,14 +120,14 @@ const MainPage = () => {
                 level={4}
               >{`Чек ${tableOrder?.checkNumber ?? ''} стол ${selectedTable.name}`}</Typography.Title>
 
-              <Flex>
-                <Flex>
+              <Row gutter={5}>
+                <Col span={9}>
                   <Order />
-                </Flex>
-                <Flex>
+                </Col>
+                <Col span={15}>
                   <Menu />
-                </Flex>
-              </Flex>
+                </Col>
+              </Row>
             </>
           )}
         </Flex>
