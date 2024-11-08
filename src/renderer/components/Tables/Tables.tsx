@@ -107,7 +107,7 @@ const Tables = ({ onChangeModal, isTablesOpen }: TablesProps): JSX.Element => {
             minHeight: 'calc(100vh - 200px)',
           }}
         > */}
-        <Row gutter={[5, 5]} align="top">
+        <Row gutter={[10, 10]} align="top">
           {tablesState.map((table) => (
             <Col key={table.id} span={8}>
               <Card

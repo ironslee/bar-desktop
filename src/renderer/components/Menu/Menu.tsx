@@ -1,5 +1,7 @@
+import './menu.scss';
 import React, { useEffect, useState } from 'react';
 import { Button, Card, Row, Col, message, Input, Flex } from 'antd';
+import { CloseCircleOutlined, CloseOutlined } from '@ant-design/icons';
 import { setCategories, setProducts, selectCategory } from './Menu.slice';
 import { RootState } from '../../app/providers/StoreProvider';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
@@ -16,7 +18,7 @@ const Menu = (): JSX.Element => {
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [allProducts, setAllProducts] = useState<ProductItem[]>([]);
-  const debouncedSearchQuery = useDebounce(searchQuery, 300);
+  const debouncedSearchQuery = useDebounce(searchQuery, 1000);
 
   // Запрос категорий при загрузке
   useEffect(() => {
@@ -51,9 +53,9 @@ const Menu = (): JSX.Element => {
     dispatch(addItemToOrder(product));
   };
 
-  const filteredProducts = searchQuery
+  const filteredProducts = debouncedSearchQuery
     ? allProducts.filter((product) =>
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()),
+        product.name.toLowerCase().includes(debouncedSearchQuery.toLowerCase()),
       )
     : products;
 
@@ -64,15 +66,40 @@ const Menu = (): JSX.Element => {
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         style={{ marginBottom: '16px' }}
+        className="input_search"
+        allowClear
       />
-      <Row gutter={[16, 16]}>
+      {/* <Input.Search
+        placeholder="Поиск по блюдам"
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        enterButton={
+          searchQuery ? (
+            <Button
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                cursor: 'pointer',
+              }}
+              onClick={() => setSearchQuery('')}
+            >
+              <CloseCircleOutlined /> Очистить
+            </Button>
+          ) : (
+            false
+          )
+        }
+        style={{ marginBottom: '16px' }}
+      /> */}
+      <Row gutter={[5, 5]}>
         {categories.map((category) => (
           <Col key={category.id} span={6}>
             <Button
+              className="menu_category_card"
               onClick={() => handleSelectCategory(category.id)}
               style={{
                 backgroundColor:
-                  selectedCategory?.id === category.id ? '#1890ff' : '',
+                  selectedCategory?.id === category.id ? '#16C787' : '',
                 color: selectedCategory?.id === category.id ? '#fff' : '',
               }}
             >
@@ -82,12 +109,27 @@ const Menu = (): JSX.Element => {
         ))}
       </Row>
 
-      <Row gutter={[16, 16]} style={{ marginTop: '16px' }}>
+      <Row gutter={[5, 5]} style={{ marginTop: '16px' }}>
         {filteredProducts.map((product) => (
           <Col key={product.id} span={6}>
             <Card
-              title={product.name}
-              cover={<img alt={product.name} src={product.link} />}
+              className="menu_item_card"
+              title={
+                <span
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    whiteSpace: 'normal',
+                  }}
+                >
+                  {product.name}
+                </span>
+              }
+              cover={
+                product.link ? (
+                  <img alt={product.name} src={product.link} />
+                ) : null
+              }
               onClick={() => handleProductClick(product)}
             >
               {`Цена: ${product.retprice} тенге`}

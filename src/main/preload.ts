@@ -22,6 +22,7 @@ import {
   TABLES_GET,
   USERS_GET,
   USERS_GET_BY_ID,
+  USERS_UPDATE_OPEN_ORDER,
 } from './services/main-constants';
 import {
   getClientById,
@@ -33,7 +34,7 @@ import { KitchenTicket, PreCheck } from '../renderer/types/Print';
 import { printCheck, printKitchenTicket } from './services/print.service';
 import { CloseOrderData, SaveOrderData } from '../renderer/types/Order';
 import { saveOrder } from './services/order.service';
-import { getUserById } from './services/users.service';
+import { getUserById, updateOpenOrderUser } from './services/users.service';
 import {
   getDiscount,
   getDiscountById,
@@ -65,6 +66,8 @@ const electronHandler = {
   getTables: () => ipcRenderer.invoke(TABLES_GET),
   getUsers: () => ipcRenderer.invoke(USERS_GET),
   getUserById: (userId: number) => ipcRenderer.invoke(USERS_GET_BY_ID, userId),
+  updateOpenOrderUser: (userId: number, orderNumber: number) =>
+    ipcRenderer.invoke(USERS_UPDATE_OPEN_ORDER, userId, orderNumber),
   getCategories: () => ipcRenderer.invoke(MENU_GET_CATEGORIES),
   getProductsByCategory: (categoryId: number) =>
     ipcRenderer.invoke(MENU_GET_PRODUCTS_BY_CATEGORY, categoryId),

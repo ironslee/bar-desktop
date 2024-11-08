@@ -2,6 +2,7 @@ export const TABLES_GET = 'tables:get';
 
 export const USERS_GET = 'users:get';
 export const USERS_GET_BY_ID = 'users:getById';
+export const USERS_UPDATE_OPEN_ORDER = 'users:updateOpenOrder';
 
 export const MENU_GET_CATEGORIES = 'menu:getCategories';
 export const MENU_GET_PRODUCTS_BY_CATEGORY = 'menu:getProductsByCategory';

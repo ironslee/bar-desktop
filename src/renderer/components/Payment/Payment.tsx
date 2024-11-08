@@ -10,8 +10,10 @@ import {
   Col,
   Divider,
   Table,
+  Flex,
 } from 'antd';
 import { useSelector } from 'react-redux'; // Для подключения к Redux
+import { useNavigate } from 'react-router-dom';
 import { RootState } from '../../app/providers/StoreProvider';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import {
@@ -21,6 +23,7 @@ import {
   OrderStatus,
   SaveOrderData,
 } from '../../types/Order';
+import { Routes } from '../../app/providers/RouterProvider';
 
 const { Text, Title } = Typography;
 
@@ -38,6 +41,7 @@ interface ProductTableItem {
 }
 
 const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
+  const navigate = useNavigate();
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | null>(
     null,
   );
@@ -120,6 +124,9 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
           message.error('Заказ не сохранен! Оплата невозможна!');
         }
       }
+
+      // navigate(Routes.Home);
+      window.location.href = '/';
     } catch (error) {
       console.error('Ошибка при сохранении заказа:', error);
       message.error('Не удалось сохранить заказ. Попробуйте еще раз.');
@@ -155,7 +162,6 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
         Оплатить
       </Button>
       <Modal
-        title="Оплата"
         open={isPaymentOpen}
         onCancel={onChangeModal}
         footer={null}
@@ -163,13 +169,15 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
         width="auto"
         style={{ maxWidth: '60vw' }}
       >
+        <Typography.Title level={3}>Оплата</Typography.Title>
+
         <Divider />
 
         <Row gutter={16}>
           {/* Левая часть - детали оплаты */}
-          <Col span={12}>
-            <div>
-              <Title level={5}>Скидка: {discount?.discount_value}%</Title>
+          <Col span={12} style={{ minHeight: '' }}>
+            <Flex vertical style={{ height: '100%' }}>
+              <Title level={5}>Скидка: {discount?.discount_value ?? 0}%</Title>
               <Title level={5}>Итого: {totalAmount} KZT</Title>
               <Title level={5}>Итого со скидкой: {amountToPay} KZT</Title>
               <Title level={5}>К оплате: {amountToPay} KZT</Title>
@@ -177,22 +185,34 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
               <Divider />
 
               {/* Выбор метода оплаты */}
+              <Typography.Title level={5}>
+                Выберите способ оплаты
+              </Typography.Title>
               <Radio.Group
                 onChange={handlePaymentMethodChange}
                 value={paymentMethod}
                 style={{ marginBottom: 16 }}
               >
-                <Radio.Button value="cash">Наличные</Radio.Button>
-                <Radio.Button value="card">Карта</Radio.Button>
+                <Radio.Button className="radio_button" value="cash">
+                  Наличные
+                </Radio.Button>
+                <Radio.Button className="radio_button" value="card">
+                  Карта
+                </Radio.Button>
               </Radio.Group>
+              <Divider />
 
-              <div style={{ display: 'flex', gap: '8px' }}>
+              <Flex
+                justify="space-between"
+                align="stretch"
+                style={{ height: '100%' }}
+              >
                 <Button onClick={onChangeModal}>Отмена</Button>
                 <Button type="primary" onClick={handlePayment}>
                   Оплатить
                 </Button>
-              </div>
-            </div>
+              </Flex>
+            </Flex>
           </Col>
 
           {/* Правая часть - чек */}
@@ -208,13 +228,13 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
               <Title level={4} style={{ textAlign: 'center' }}>
                 Barista
               </Title>
-              <Text>{tableOrder?.checkNumber}</Text>
+              <Text>Чек {tableOrder?.checkNumber}</Text>
               <br />
               <Text>Дата: {new Date().toLocaleString()}</Text>
               <br />
-              <Text>{`Клиент: ${tableOrder?.orderClient?.name}`}</Text>
+              <Text>{`Клиент: ${tableOrder?.orderClient?.name ?? ''}`}</Text>
               <br />
-              <Text>{`Контакты клиента: ${tableOrder?.orderClient?.number}`}</Text>
+              <Text>{`Контакты клиента: ${tableOrder?.orderClient?.number ?? ''}`}</Text>
               <Divider />
               <table className="tableStyle">
                 <thead>
@@ -240,7 +260,7 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
               </table>
               <Divider />
               <Text style={{ fontWeight: 'bold' }}>
-                Скидка: {discount?.discount_value}%
+                Скидка: {discount?.discount_value ?? 0}%
               </Text>
               <br />
               <Text style={{ fontWeight: 'bold' }}>

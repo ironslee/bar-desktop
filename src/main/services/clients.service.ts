@@ -35,7 +35,10 @@ export const getClientById = (clientId: number): ClientItem => {
   return client as ClientItem;
 };
 
-export const updateOpenOrderClient = (clientId: number, orderNumber: number) => {
+export const updateOpenOrderClient = (
+  clientId: number,
+  orderNumber: number,
+) => {
   const db = connect();
 
   const updateClientQuery = db.prepare(`

@@ -96,8 +96,11 @@ const MainPage = () => {
     <>
       <Flex>
         <Flex vertical style={{ width: '100%' }}>
-          <Flex justify="left">
-            <Flex>
+          <Flex
+            justify="space-between"
+            style={{ width: '37.5%', marginBottom: '10px' }}
+          >
+            <Flex style={{ marginRight: '20px' }}>
               <Tables
                 onChangeModal={onChangeTablesModal}
                 isTablesOpen={isTablesOpen}
@@ -116,9 +119,14 @@ const MainPage = () => {
 
           {selectedTable && selectedUser && (
             <>
-              <Typography.Title
-                level={4}
-              >{`Чек ${tableOrder?.checkNumber ?? ''} стол ${selectedTable.name}`}</Typography.Title>
+              <Typography.Title level={4}>
+                {tableOrder?.checkNumber
+                  ? `Чек  ${tableOrder?.checkNumber}
+                  Стол ${selectedTable.name}
+                  `
+                  : `Заказ не сохранен
+                  Стол ${selectedTable.name}`}
+              </Typography.Title>
 
               <Row gutter={5}>
                 <Col span={9}>

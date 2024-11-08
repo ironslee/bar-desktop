@@ -34,3 +34,17 @@ export const getUserById = (userId: number): UserItem => {
 
   return user as UserItem;
 };
+
+export const updateOpenOrderUser = (userId: number, orderNumber: number) => {
+  const db = connect();
+
+  const updateUserQuery = db.prepare(`
+    UPDATE orders
+    SET created_by = ?
+    WHERE number = ? AND status = 'open';
+  `);
+
+  updateUserQuery.run(userId, orderNumber);
+
+  db.close();
+};
