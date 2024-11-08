@@ -1,5 +1,16 @@
+import './discount.scss';
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Col, Flex, Input, message, Modal, Row } from 'antd';
+import {
+  Button,
+  Card,
+  Col,
+  Flex,
+  Input,
+  message,
+  Modal,
+  Row,
+  Typography,
+} from 'antd';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import {
   selectDiscount,
@@ -52,7 +63,6 @@ const Discount = ({ onChangeModal, isOpen }: DiscountProps): JSX.Element => {
     } else if (selectedDiscount) {
       setDiscountValue(selectedDiscount.discount_value);
     }
-    console.log('DISCOUNTVALUE ', discountValue);
   }, [selectedDiscount]);
 
   // const handleDiscountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -126,12 +136,7 @@ const Discount = ({ onChangeModal, isOpen }: DiscountProps): JSX.Element => {
       >
         {`Скидка ${selectedDiscount ? selectedDiscount?.discount_value : 0}%`}
       </Button>
-      <Modal
-        title="Скидка"
-        open={isOpen}
-        footer={null}
-        onCancel={onChangeModal}
-      >
+      <Modal open={isOpen} footer={null} onCancel={onChangeModal}>
         {/* <h3>Установить скидку</h3>
         <Input
           type="number"
@@ -141,32 +146,40 @@ const Discount = ({ onChangeModal, isOpen }: DiscountProps): JSX.Element => {
           min={0}
           max={100}
         /> */}
-        <Flex
+        {/* <Flex
           style={{
             width: '100%',
             minHeight: 'calc(100vh - 48px)',
             flexWrap: 'wrap',
             gap: '16px',
           }}
-        >
-          <h2>Выберите стол</h2>
-          <Row gutter={[16, 16]}>
-            {discountState.map((record) => (
-              <Col key={record.id} span={6}>
-                <Card
-                  hoverable
-                  onClick={() => handleSelectDiscount(record)}
-                  style={{
-                    backgroundColor: 'white',
-                    border: '3px solid green',
-                  }}
-                >
-                  <Card.Meta title={record.discount_value} />
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </Flex>
+        > */}
+        <Row>
+          <Typography.Title level={3}>Выберите скидку</Typography.Title>
+        </Row>
+        <Row gutter={[16, 16]} style={{ marginBottom: '10px' }}>
+          {discountState.map((record) => (
+            <Col key={record.id} span={6}>
+              <Card
+                className="card"
+                hoverable
+                onClick={() => handleSelectDiscount(record)}
+                style={{
+                  backgroundColor: 'white',
+                  border:
+                    selectedDiscount?.id === record.id
+                      ? '3px solid #16C787'
+                      : '1px solid gray',
+                  fontWeight:
+                    selectedDiscount?.id === record.id ? '600' : '400',
+                }}
+              >
+                {record.discount_value}
+              </Card>
+            </Col>
+          ))}
+        </Row>
+        {/* </Flex> */}
         {/* <Button
           type="primary"
           onClick={handleConfirmDiscount}
@@ -177,7 +190,7 @@ const Discount = ({ onChangeModal, isOpen }: DiscountProps): JSX.Element => {
         <Button
           type="default"
           onClick={handleResetDiscount}
-          style={{ marginTop: '10px' }}
+          style={{ marginTop: '10px', backgroundColor: '#fff' }}
         >
           Сбросить
         </Button>

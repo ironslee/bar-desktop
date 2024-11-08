@@ -262,8 +262,7 @@ const Order = (): JSX.Element => {
 
   return (
     <>
-      <Card style={{ padding: '0px', minHeight: '500px', alignItems: 'start' }}>
-        {/* <div style={{ width: '100%' }}> */}
+      <Card style={{ padding: '0px', alignItems: 'start' }}>
         <Row className="order_row items_row">
           {items.map((item: OrderItem) => (
             <Flex
@@ -324,60 +323,57 @@ const Order = (): JSX.Element => {
             </Flex>
           ))}
         </Row>
-        {/* </div> */}
-        <div style={{ marginTop: 'auto' }}>
-          <Divider />
-          <Row className="order_row">
-            <Col>
-              {' '}
-              <Clients onChangeModal={onChangeModal} isOpen={isOpen} />
-            </Col>
-            <Col>
-              <Discount
-                onChangeModal={onChangeDiscountModal}
-                isOpen={isDiscountOpen}
-              />
-            </Col>
-          </Row>
-
-          <Row className="order_row">
-            <Col>
-              {' '}
-              <Title level={4} style={{ marginBottom: '0' }}>
-                К оплате:
-              </Title>
-            </Col>
-            <Col>
-              <Title
-                level={4}
-                style={{ marginBottom: '0' }}
-              >{`${selectedDiscount !== null && selectedDiscount !== undefined ? totalAmount - (totalAmount / 100) * selectedDiscount.discount_value : totalAmount} тенге`}</Title>
-            </Col>
-          </Row>
-
-          <Row className="order_row">
-            <Button
-              onClick={handlePrintKitchenTicket}
-              type="primary"
-              style={{ width: '100%', fontSize: '18px' }}
-            >
-              Бегунок
-            </Button>
-          </Row>
-          <Row className="order_row">
-            <Button
-              onClick={handlePrintPreCheck}
-              type="default"
-              style={{ fontSize: '18px' }}
-            >
-              Пред печать
-            </Button>
-            <Payment
-              isPaymentOpen={isPaymentOpen}
-              onChangeModal={onChangePaymentModal}
+        <Divider />
+        <Row className="order_row">
+          <Col>
+            {' '}
+            <Clients onChangeModal={onChangeModal} isOpen={isOpen} />
+          </Col>
+          <Col>
+            <Discount
+              onChangeModal={onChangeDiscountModal}
+              isOpen={isDiscountOpen}
             />
-          </Row>
-        </div>
+          </Col>
+        </Row>
+
+        <Row className="order_row">
+          <Col>
+            {' '}
+            <Title level={4} style={{ marginBottom: '0' }}>
+              К оплате:
+            </Title>
+          </Col>
+          <Col>
+            <Title
+              level={4}
+              style={{ marginBottom: '0' }}
+            >{`${selectedDiscount !== null && selectedDiscount !== undefined ? totalAmount - (totalAmount / 100) * selectedDiscount.discount_value : totalAmount} тенге`}</Title>
+          </Col>
+        </Row>
+
+        <Row className="order_row">
+          <Button
+            onClick={handlePrintKitchenTicket}
+            type="primary"
+            style={{ width: '100%', fontSize: '18px' }}
+          >
+            Бегунок
+          </Button>
+        </Row>
+        <Row className="order_row">
+          <Button
+            onClick={handlePrintPreCheck}
+            type="default"
+            style={{ fontSize: '18px' }}
+          >
+            Пред печать
+          </Button>
+          <Payment
+            isPaymentOpen={isPaymentOpen}
+            onChangeModal={onChangePaymentModal}
+          />
+        </Row>
       </Card>
     </>
   );

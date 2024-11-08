@@ -36,9 +36,14 @@ import {
   TABLES_GET,
   USERS_GET,
   USERS_GET_BY_ID,
+  USERS_UPDATE_OPEN_ORDER,
 } from './services/main-constants';
 import { openRoute } from './services/route.service';
-import { getUserById, getUsers } from './services/users.service';
+import {
+  getUserById,
+  getUsers,
+  updateOpenOrderUser,
+} from './services/users.service';
 import {
   getAllProducts,
   getCategories,
@@ -182,6 +187,12 @@ app
     ipcMain.handle(USERS_GET_BY_ID, async (_, userId: number) => {
       return getUserById(userId);
     });
+    ipcMain.handle(
+      USERS_UPDATE_OPEN_ORDER,
+      async (_, userId: number, orderNumber: number) => {
+        return updateOpenOrderUser(userId, orderNumber);
+      },
+    );
     ipcMain.handle(MENU_GET_CATEGORIES, async () => {
       return getCategories();
     });

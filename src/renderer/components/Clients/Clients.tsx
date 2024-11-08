@@ -1,6 +1,6 @@
 import './clients.scss';
 import { useEffect, useState } from 'react';
-import { Button, Input, Modal, Table, message } from 'antd';
+import { Button, Input, Modal, Table, Typography, message } from 'antd';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { setClients, selectClient } from './Clients.slice';
@@ -94,16 +94,13 @@ const Clients = ({ onChangeModal, isOpen }: ClientsProps): JSX.Element => {
       >
         {selectedClient ? `Клиент ${selectedClient.name}` : 'Клиент не выбран'}
       </Button>
-      <Modal
-        title="Клиенты"
-        open={isOpen}
-        footer={null}
-        onCancel={onChangeModal}
-      >
+      <Modal open={isOpen} footer={null} onCancel={onChangeModal}>
+        <Typography.Title level={3}>Выберите пользователя</Typography.Title>
         <Input
           placeholder="Поиск по имени"
           onChange={(e) => setSearchItem(e.target.value)}
           style={{ marginBottom: 16 }}
+          allowClear
         />
         <Table
           columns={columns}

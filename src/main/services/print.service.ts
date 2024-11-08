@@ -236,17 +236,17 @@ export const printCheck = async (orderCheck: PreCheck): Promise<boolean> => {
           marginBottom: '4px',
         },
       },
-      {
-        type: 'text', // 'text' | 'barCode' | 'qrCode' | 'image' | 'table
-        value: `Стол ${orderCheck.table}`,
-        style: {
-          fontWeight: '700',
-          textAlign: 'center',
-          fontSize: '14px',
-          marginBottom: '12px',
-          padding: '0 12px',
-        },
-      },
+      // {
+      //   type: 'text', // 'text' | 'barCode' | 'qrCode' | 'image' | 'table
+      //   value: `Стол ${orderCheck.table}`,
+      //   style: {
+      //     fontWeight: '700',
+      //     textAlign: 'center',
+      //     fontSize: '14px',
+      //     marginBottom: '12px',
+      //     padding: '0 12px',
+      //   },
+      // },
       {
         type: 'table',
         // style the table
@@ -255,12 +255,36 @@ export const printCheck = async (orderCheck: PreCheck): Promise<boolean> => {
           color: '#000',
           fontSize: '12px',
           borderCollapse: 'unset',
-          marginBottom: '16px',
+          marginBottom: '5px',
         },
         // list of the columns to be rendered in the table header
         tableHeader: ['', ''],
         // multi dimensional array depicting the rows and columns of the table body
         tableBody: [
+          [
+            {
+              type: 'text',
+              value: 'Стол:',
+              style: { textAlign: 'left', fontWeight: '600' },
+            },
+            {
+              type: 'text',
+              value: orderCheck.table,
+              style: { textAlign: 'right', fontWeight: '600' },
+            },
+          ],
+          [
+            {
+              type: 'text',
+              value: 'Чек:',
+              style: { textAlign: 'left', fontWeight: '600' },
+            },
+            {
+              type: 'text',
+              value: String(orderCheck.checkId),
+              style: { textAlign: 'right', fontWeight: '600' },
+            },
+          ],
           [
             {
               type: 'text', // 'text' | 'barCode' | 'qrCode' | 'image' | 'table

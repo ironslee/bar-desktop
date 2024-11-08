@@ -18,6 +18,12 @@ const Users = ({ onChangeModal, isUsersOpen }: UsersProps): JSX.Element => {
     (state: RootState) => state.usersStore,
   );
   const [usersState, setUsersState] = useState<UserItem[]>([]);
+  const { tableOrders, selectedTable } = useAppSelector(
+    (state: RootState) => state.tablesStore,
+  );
+  const tableOrder = tableOrders.find(
+    (order) => order.tableId === selectedTable?.id,
+  );
 
   const fetchUsers = async () => {
     try {
@@ -35,8 +41,18 @@ const Users = ({ onChangeModal, isUsersOpen }: UsersProps): JSX.Element => {
     }
   }, [isUsersOpen]);
 
-  const handleSelectUser = (id: number) => {
-    dispatch(selectUser(id));
+  const handleSelectUser = async (record: UserItem) => {
+    dispatch(selectUser(record.id));
+    try {
+      if (tableOrder?.checkNumber) {
+        await window.electron.updateOpenOrderUser(
+          record.id,
+          tableOrder.checkNumber,
+        );
+      }
+    } catch {
+      // Ошибки обрабатываются без вывода сообщений
+    }
     onChangeModal();
   };
 
@@ -50,40 +66,37 @@ const Users = ({ onChangeModal, isUsersOpen }: UsersProps): JSX.Element => {
       >
         {selectedUser ? selectedUser.name : 'Выберите официанта'}
       </Button>
-      <Modal
-        title="Пользователи"
-        open={isUsersOpen}
-        footer={[]}
-        onCancel={onChangeModal}
-      >
-        <Flex
+      <Modal open={isUsersOpen} footer={[]} onCancel={onChangeModal}>
+        <Typography.Title level={3}>Выберите пользователя</Typography.Title>
+        {/* <Flex
           style={{
             width: '100%',
             minHeight: 'calc(100vh - 48px)',
             flexWrap: 'wrap',
             gap: '16px',
           }}
-        >
-          <Typography>Выберите пользователя</Typography>
-          <Row gutter={[16, 16]}>
-            {usersState.map((user) => (
-              <Col key={user.id} span={6}>
-                <Card
-                  hoverable
-                  onClick={() => handleSelectUser(user.id)}
-                  style={{
-                    border:
-                      selectedUser?.id === user.id
-                        ? '2px solid black'
-                        : '1px solid gray',
-                  }}
-                >
-                  <Card.Meta title={user.name} />
-                </Card>
-              </Col>
-            ))}
-          </Row>
-        </Flex>
+        > */}
+        <Row gutter={[10, 10]} align="top">
+          {usersState.map((user) => (
+            <Col key={user.id} span={8}>
+              <Card
+                className="card"
+                hoverable
+                onClick={() => handleSelectUser(user)}
+                style={{
+                  border:
+                    selectedUser?.id === user.id
+                      ? '3px solid #16C787'
+                      : '1px solid gray',
+                  fontWeight: selectedUser?.id === user.id ? '600' : '400',
+                }}
+              >
+                {user.name}
+              </Card>
+            </Col>
+          ))}
+        </Row>
+        {/* </Flex> */}
       </Modal>
     </>
   );
