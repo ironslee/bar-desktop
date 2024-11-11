@@ -1,3 +1,8 @@
+// .menu_wrap {
+//   position:relative;
+//   top: -9.5%;
+// }
+
 .menu_category_card {
   width: 100%;
   min-height: 50px;
@@ -21,4 +26,23 @@
     flex: 1;
     justify-content: flex-end;
   }
+}
+
+.categories_wrap {
+  border: 1px solid #d3d3d3;
+  border-radius: 10px;
+  padding: 5px;
+}
+
+.breadcrumb_item li {
+  display: flex;
+  align-items: center !important;
+}
+
+.breadcrumb_link {
+  color: #000;
+  padding: 10px 5px;
+}
+.breadcrumb_link:hover{
+  color: #16C787!important;
 }

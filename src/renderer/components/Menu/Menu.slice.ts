@@ -24,7 +24,7 @@ export const menuSlice = createSlice({
     setProducts(state, action: PayloadAction<ProductItem[]>) {
       state.products = action.payload;
     },
-    selectCategory(state, action: PayloadAction<number>) {
+    selectCategory(state, action: PayloadAction<number | null>) {
       const categoryId = action.payload;
       state.selectedCategory =
         state.categories.find((category) => category.id === categoryId) || null;

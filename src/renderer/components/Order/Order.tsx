@@ -204,10 +204,10 @@ const Order = (): JSX.Element => {
   const handlePrintKitchenTicket = async () => {
     if (tableId && tableOrderItems) {
       const itemsToPrint = tableOrderItems
-        .filter((item) => item.quantity > item.printedQuantity) // Только те, которые еще не отправлены
+        .filter((item) => item.quantity > item.printedQuantity) // не отправленные
         .map((item) => ({
           ...item,
-          printedQuantity: item.quantity - item.printedQuantity, // Отправляем только оставшиеся
+          printedQuantity: item.quantity - item.printedQuantity, // только оставшиеся
           productId: item.product.id,
           price: item.product.retprice,
         }));

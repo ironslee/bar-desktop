@@ -50,12 +50,10 @@ export const tablesSlice = createSlice({
       );
 
       if (selectedTable && !selectedTableOrder) {
-        // Генерация номера чека
-        // const newOrderId = Math.floor(Math.random() * 1000);
         state.tableOrders.push({
           tableId: selectedTable.id,
-          // checkNumber: newOrderId,
           orderDiscount: null,
+          // orderUser: undefined,
         });
       }
 
@@ -100,6 +98,22 @@ export const tablesSlice = createSlice({
       }
 
       if (tableOrder) {
+        // if (
+        //   tableOrder.orderUser !== undefined ||
+        //   tableOrder.orderUser !== null
+        // ) {
+        //   tableOrder.orderUser = orderUser;
+        // }
+
+        // if (
+        //   tableOrder.orderUser === undefined ||
+        //   tableOrder.orderUser === null
+        // ) {
+        //   tableOrder.orderUser = undefined;
+        // } else {
+        //   tableOrder.orderUser = orderUser;
+        // }
+
         if (
           tableOrder.orderClient === undefined ||
           tableOrder.orderClient === null
@@ -133,13 +147,20 @@ export const tablesSlice = createSlice({
 
         // tableOrder.orderDiscount = orderDiscount;
         // tableOrder.orderClient = orderClient;
+        // if (orderUser !== undefined || orderUser !== null) {
+        //   tableOrder.orderUser = orderUser;
+        // }
+
         if (orderClient !== undefined || orderClient !== null) {
           tableOrder.orderClient = orderClient;
         }
+
         if (orderDiscount !== undefined || orderDiscount !== null) {
           tableOrder.orderDiscount = orderDiscount;
         }
+
         tableOrder.orderUser = orderUser;
+
         if (checkNumber !== undefined) {
           tableOrder.checkNumber = checkNumber;
         }

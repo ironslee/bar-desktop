@@ -25,7 +25,7 @@ export const usersSlice = createSlice({
         state.users.find((user) => user.id === userId) || null;
     },
 
-    addUserFromTableOrder(state, action: PayloadAction<UserItem>) {
+    addUserFromTableOrder(state, action: PayloadAction<UserItem | null>) {
       state.selectedUser = action.payload;
     },
 

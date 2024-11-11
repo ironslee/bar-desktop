@@ -61,8 +61,10 @@ const Tables = ({ onChangeModal, isTablesOpen }: TablesProps): JSX.Element => {
       } else {
         dispatch(addClientFromTableOrder(tableOrder.orderClient ?? null));
       }
-      if (tableOrder.orderUser) {
-        dispatch(addUserFromTableOrder(tableOrder.orderUser ?? null));
+      if (tableOrder.orderUser === undefined || tableOrder.orderUser === null) {
+        dispatch(addUserFromTableOrder(null));
+      } else {
+        dispatch(addUserFromTableOrder(tableOrder.orderUser));
       }
       // dispatch(
       //   addDiscountFromTableOrder(

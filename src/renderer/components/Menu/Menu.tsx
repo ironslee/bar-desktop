@@ -1,6 +1,16 @@
 import './menu.scss';
 import React, { useEffect, useState } from 'react';
-import { Button, Card, Row, Col, message, Input, Flex } from 'antd';
+import {
+  Button,
+  Card,
+  Row,
+  Col,
+  message,
+  Input,
+  Flex,
+  Carousel,
+  Breadcrumb,
+} from 'antd';
 import { CloseCircleOutlined, CloseOutlined } from '@ant-design/icons';
 import { setCategories, setProducts, selectCategory } from './Menu.slice';
 import { RootState } from '../../app/providers/StoreProvider';
@@ -60,7 +70,7 @@ const Menu = (): JSX.Element => {
     : products;
 
   return (
-    <Flex vertical>
+    <Flex vertical className="menu_wrap">
       <Input
         placeholder="Поиск по блюдам"
         value={searchQuery}
@@ -91,7 +101,9 @@ const Menu = (): JSX.Element => {
         }
         style={{ marginBottom: '16px' }}
       /> */}
-      <Row gutter={[5, 5]}>
+
+      {/* КЛАССИКА */}
+      <Row gutter={[5, 5]} className="categories_wrap">
         {categories.map((category) => (
           <Col key={category.id} span={6}>
             <Button
@@ -108,6 +120,90 @@ const Menu = (): JSX.Element => {
           </Col>
         ))}
       </Row>
+
+      {/* СЛАЙДЕР */}
+      {/* <Carousel
+        dots={false}
+        slidesToShow={4}
+        slidesToScroll={4}
+        arrows
+        infinite
+        draggable
+      >
+        {categories.map((category) => (
+          <Button
+            key={category.id}
+            className="menu_category_card"
+            onClick={() => handleSelectCategory(category.id)}
+            style={{
+              backgroundColor:
+                selectedCategory?.id === category.id ? '#16C787' : '',
+              color: selectedCategory?.id === category.id ? '#fff' : '',
+            }}
+          >
+            {category.name}
+          </Button>
+        ))}
+      </Carousel> */}
+
+      {/* ХЛЕБНЫЕ КРОШКИ */}
+      {/* <Breadcrumb className="breadcrumb_item" separator=">">
+        <Breadcrumb.Item onClick={() => dispatch(selectCategory(null))}>
+          <Button className="breadcrumb_link" type="link">
+            Все категории
+          </Button>
+        </Breadcrumb.Item>
+        <Breadcrumb.Item>
+          <Button type="link" className="breadcrumb_link">
+            {' '}
+            {selectedCategory ? selectedCategory.name : ''}
+          </Button>
+        </Breadcrumb.Item>
+      </Breadcrumb>
+      {!selectedCategory && (
+        <Row gutter={[5, 5]} className="categories_wrap">
+          {categories.map((category) => (
+            <Col key={category.id} span={6}>
+              <Button
+                className="menu_category_card"
+                onClick={() => handleSelectCategory(category.id)}
+              >
+                {category.name}
+              </Button>
+            </Col>
+          ))}
+        </Row>
+      )}
+      {selectedCategory && (
+        <Row gutter={[5, 5]}>
+          {filteredProducts.map((product) => (
+            <Col key={product.id} span={6}>
+              <Card
+                className="menu_item_card"
+                title={
+                  <span
+                    style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      whiteSpace: 'normal',
+                    }}
+                  >
+                    {product.name}
+                  </span>
+                }
+                cover={
+                  product.link ? (
+                    <img alt={product.name} src={product.link} />
+                  ) : null
+                }
+                onClick={() => handleProductClick(product)}
+              >
+                {`Цена: ${product.retprice} тенге`}
+              </Card>
+            </Col>
+          ))}
+        </Row>
+      )} */}
 
       <Row gutter={[5, 5]} style={{ marginTop: '16px' }}>
         {filteredProducts.map((product) => (
