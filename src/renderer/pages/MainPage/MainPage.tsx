@@ -55,6 +55,7 @@ const MainPage = () => {
                     : Promise.resolve(undefined),
                 ],
               );
+
               const orderItems: OrderItem[] = await Promise.all(
                 order.items.map(async (item) => {
                   const product: ProductItem =
@@ -93,53 +94,110 @@ const MainPage = () => {
   }, [dispatch]);
 
   return (
+    // <>
+    //   <Flex>
+    //     <Flex vertical style={{ width: '100%' }}>
+    //       <Flex
+    //         justify="space-between"
+    //         style={{ width: '37.5%', marginBottom: '10px' }}
+    //       >
+    //         <Flex style={{ marginRight: '20px' }}>
+    //           <Tables
+    //             onChangeModal={onChangeTablesModal}
+    //             isTablesOpen={isTablesOpen}
+    //           />
+    //         </Flex>
+
+    //         {selectedTable && (
+    //           <Flex>
+    //             <Users
+    //               onChangeModal={onChangeUsersModal}
+    //               isUsersOpen={isUsersOpen}
+    //             />
+    //           </Flex>
+    //         )}
+    //       </Flex>
+
+    //       {selectedTable && selectedUser && (
+    //         <>
+    //           <Row gutter={5}>
+    //             <Col span={9}>
+    //               <Row style={{ justifyContent: 'space-between' }}>
+    //                 <Col>
+    //                   <Typography.Title level={4} className="order_title">
+    //                     {`Стол ${selectedTable.name}`}
+    //                   </Typography.Title>
+    //                 </Col>
+    //                 <Col>
+    //                   <Typography.Title level={4} className="order_title">
+    //                     {tableOrder?.checkNumber
+    //                       ? `Чек  ${tableOrder?.checkNumber}`
+    //                       : `Заказ не сохранен`}
+    //                   </Typography.Title>
+    //                 </Col>
+    //               </Row>
+    //             </Col>
+    //           </Row>
+    //           <Row gutter={5}>
+    //             <Col span={9}>
+    //               <Order />
+    //             </Col>
+    //             <Col span={15}>
+    //               <Menu />
+    //             </Col>
+    //           </Row>
+    //         </>
+    //       )}
+    //     </Flex>
+    //   </Flex>
+    // </>
     <>
-      <Flex>
-        <Flex vertical style={{ width: '100%' }}>
-          <Flex
-            justify="space-between"
-            style={{ width: '37.5%', marginBottom: '10px' }}
-          >
-            <Flex style={{ marginRight: '20px' }}>
-              <Tables
-                onChangeModal={onChangeTablesModal}
-                isTablesOpen={isTablesOpen}
-              />
-            </Flex>
-
-            {selectedTable && (
-              <Flex>
-                <Users
-                  onChangeModal={onChangeUsersModal}
-                  isUsersOpen={isUsersOpen}
-                />
-              </Flex>
-            )}
-          </Flex>
-
+      <Row justify="space-between" align="top">
+        <Col span={9}>
           {selectedTable && selectedUser && (
-            <>
-              <Typography.Title level={4}>
-                {tableOrder?.checkNumber
-                  ? `Чек  ${tableOrder?.checkNumber}
-                  Стол ${selectedTable.name}
-                  `
-                  : `Заказ не сохранен
-                  Стол ${selectedTable.name}`}
-              </Typography.Title>
-
-              <Row gutter={5}>
-                <Col span={9}>
-                  <Order />
-                </Col>
-                <Col span={15}>
-                  <Menu />
-                </Col>
-              </Row>
-            </>
+            <Row justify="space-between">
+              <Col>
+                <Typography.Title level={4} className="order_title">
+                  {`Стол ${selectedTable.name}`}
+                </Typography.Title>
+              </Col>
+              <Col>
+                <Typography.Title level={4} className="order_title">
+                  {tableOrder?.checkNumber
+                    ? `Чек ${tableOrder.checkNumber}`
+                    : `Заказ не сохранен`}
+                </Typography.Title>
+              </Col>
+            </Row>
           )}
-        </Flex>
-      </Flex>
+        </Col>
+
+        <Col flex="none" span={15} style={{ display: 'flex', gap: '20px' }}>
+          <Tables
+            onChangeModal={onChangeTablesModal}
+            isTablesOpen={isTablesOpen}
+          />
+          {selectedTable && (
+            <Users
+              onChangeModal={onChangeUsersModal}
+              isUsersOpen={isUsersOpen}
+            />
+          )}
+        </Col>
+      </Row>
+
+      {selectedTable && selectedUser && (
+        <>
+          <Row gutter={5}>
+            <Col span={9}>
+              <Order />
+            </Col>
+            <Col span={15}>
+              <Menu />
+            </Col>
+          </Row>
+        </>
+      )}
     </>
   );
 };
