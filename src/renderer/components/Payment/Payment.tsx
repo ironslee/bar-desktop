@@ -11,6 +11,8 @@ import {
   Divider,
   Table,
   Flex,
+  Drawer,
+  Space,
 } from 'antd';
 import { useSelector } from 'react-redux'; // Для подключения к Redux
 import { useNavigate } from 'react-router-dom';
@@ -24,6 +26,8 @@ import {
   SaveOrderData,
 } from '../../types/Order';
 import { Routes } from '../../app/providers/RouterProvider';
+import { Check } from '../Check';
+import { PaymentTypeEnum } from '../../types/Payment';
 
 const { Text, Title } = Typography;
 
@@ -40,11 +44,14 @@ interface ProductTableItem {
   total: number;
 }
 
-const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
+const Payment = ({
+  isPaymentOpen,
+  onChangeModal,
+}: PaymentProps): JSX.Element => {
   const navigate = useNavigate();
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | null>(
-    null,
-  );
+  const [paymentMethod, setPaymentMethod] = useState<
+    PaymentTypeEnum.CASH | PaymentTypeEnum.CARD | null
+  >(null);
 
   // Данные из Redux
   const tableId = useAppSelector(
@@ -60,7 +67,7 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
 
   const amountToPay =
     totalAmount - (totalAmount / 100) * (discount?.discount_value || 0);
-  const paymentMethodValue = paymentMethod === 'cash' ? 0 : 1;
+  const paymentMethodValue = paymentMethod === PaymentTypeEnum.CASH ? 0 : 1;
 
   const handlePaymentMethodChange = (e: any) => {
     setPaymentMethod(e.target.value);
@@ -118,15 +125,15 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
         });
 
         if (response) {
-          message.success('Оплата успешно завершена!');
+          await message.success('Оплата успешно завершена!');
           onChangeModal(); // Закрываем окно оплаты
+          window.location.href = '/';
         } else {
           message.error('Заказ не сохранен! Оплата невозможна!');
         }
       }
 
       // navigate(Routes.Home);
-      window.location.href = '/';
     } catch (error) {
       console.error('Ошибка при сохранении заказа:', error);
       message.error('Не удалось сохранить заказ. Попробуйте еще раз.');
@@ -161,7 +168,7 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
       >
         Оплатить
       </Button>
-      <Modal
+      {/* <Modal
         open={isPaymentOpen}
         onCancel={onChangeModal}
         footer={null}
@@ -174,7 +181,6 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
         <Divider />
 
         <Row gutter={16}>
-          {/* Левая часть - детали оплаты */}
           <Col span={12} style={{ minHeight: '' }}>
             <Flex vertical style={{ height: '100%' }}>
               <Title level={5}>Скидка: {discount?.discount_value ?? 0}%</Title>
@@ -184,7 +190,6 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
 
               <Divider />
 
-              {/* Выбор метода оплаты */}
               <Typography.Title level={5}>
                 Выберите способ оплаты
               </Typography.Title>
@@ -213,10 +218,10 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
                 </Button>
               </Flex>
             </Flex>
-          </Col>
+          </Col> */}
 
-          {/* Правая часть - чек */}
-          <Col span={12}>
+      {/* Правая часть - чек */}
+      {/* <Col span={12}>
             <div
               style={{
                 border: '1px solid #d9d9d9',
@@ -271,9 +276,96 @@ const Payment: React.FC<PaymentProps> = ({ isPaymentOpen, onChangeModal }) => {
                 ИТОГО СО СКИДКОЙ: {amountToPay} тг
               </Text>
             </div>
-          </Col>
+          </Col> */}
+      {/* <Check
+            amountToPay={amountToPay}
+            discount={discount}
+            totalAmount={totalAmount}
+            tableOrder={tableOrder}
+          />
         </Row>
-      </Modal>
+      </Modal> */}
+      {/* ------------------------- */}
+      <Drawer
+        title="Оплата"
+        placement="right"
+        size="large"
+        width="100%"
+        onClose={onChangeModal}
+        open={isPaymentOpen}
+        extra={
+          <Space size="middle">
+            <Button onClick={onChangeModal}>Отмена</Button>
+            <Button
+              type="primary"
+              onClick={handlePayment}
+              // disabled={discountSum - paymentsSum > 0}
+            >
+              Оплатить
+            </Button>
+          </Space>
+        }
+      >
+        <Flex align="flex-start">
+          {/* Левая часть - детали оплаты */}
+          <Flex
+            gap="16px"
+            vertical
+            style={{ flexBasis: '50%' }}
+            className="payment-actions"
+          >
+            <Flex
+              vertical
+              style={{
+                marginBottom: '32px',
+              }}
+            >
+              <Title level={5}>Скидка: {discount?.discount_value ?? 0}%</Title>
+              <Title level={5}>Итого: {totalAmount} KZT</Title>
+              <Title level={5}>Итого со скидкой: {amountToPay} KZT</Title>
+              <Title level={5}>К оплате: {amountToPay} KZT</Title>
+
+              <Divider />
+
+              {/* Выбор метода оплаты */}
+              <Typography.Title level={5}>
+                Выберите способ оплаты
+              </Typography.Title>
+              <Radio.Group
+                onChange={handlePaymentMethodChange}
+                value={paymentMethod}
+                style={{ marginBottom: 16 }}
+              >
+                <Radio.Button className="radio_button" value="cash">
+                  Наличные
+                </Radio.Button>
+                <Radio.Button className="radio_button" value="card">
+                  Карта
+                </Radio.Button>
+              </Radio.Group>
+            </Flex>
+            <Divider />
+
+            {/* <Flex
+                justify="space-between"
+                align="stretch"
+                style={{ height: '100%' }}
+              >
+                <Button onClick={onChangeModal}>Отмена</Button>
+                <Button type="primary" onClick={handlePayment}>
+                  Оплатить
+                </Button>
+              </Flex> */}
+          </Flex>
+
+          <Check
+            amountToPay={amountToPay}
+            discount={discount}
+            totalAmount={totalAmount}
+            tableOrder={tableOrder}
+          />
+        </Flex>
+      </Drawer>
     </>
   );
 };

@@ -1,0 +1,111 @@
+.check {
+  width: 80mm;
+  margin: 0;
+  padding: 24px 12px;
+  color: #000;
+  font-size: 11pt;
+  box-shadow: rgba(29, 32, 35, 0.08) 0px 16px 32px;
+
+  .data-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    span {
+      font-size: 12px;
+    }
+  }
+
+  .products {
+    margin-top: 8px;
+
+    td,
+    th {
+      padding: 1mm !important;
+      color: #000;
+      font-size: 9pt;
+      border: 1px solid #000;
+    }
+
+    td:nth-child(1) {
+      width: 1mm;
+    }
+    td:nth-child(3),
+    td:nth-child(5) {
+      width: 12mm;
+    }
+    td:nth-child(4) {
+      width: 9mm;
+    }
+  }
+}
+
+@page {
+  @top-left-corner {
+    width: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  @left-top {
+    width: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  @left-middle {
+    width: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  @left-bottom {
+    width: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  @bottom-left-corner {
+    width: 0;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
+@page :left {
+  margin-left: 0;
+}
+
+@page :right {
+  margin-left: 0;
+}
+
+@media print {
+  .ant-drawer {
+    .ant-drawer-header,
+    .payment-actions {
+      visibility: hidden;
+      height: 0;
+      width: 0;
+      margin: 0;
+      padding: 0;
+      flex-basis: 0% !important;
+    }
+
+    .ant-drawer-body {
+      padding: 0;
+
+      .check {
+        padding: 0;
+        box-shadow: none;
+
+        padding-left: unset !important;
+        padding-right: unset !important;
+        max-width: unset !important;
+      }
+    }
+  }
+
+  *:not(.check) {
+  }
+}

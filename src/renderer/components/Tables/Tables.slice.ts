@@ -9,7 +9,7 @@ import { DiscountItem } from '../../types/Discount';
 //   printedQuantity?: number;
 // }
 
-interface TableOrder {
+export interface TableOrder {
   tableId: number;
   checkNumber?: number;
   orderItems?: OrderItem[];
