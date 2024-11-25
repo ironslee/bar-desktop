@@ -397,7 +397,7 @@ export const printCheck = async (orderCheck: PreCheck): Promise<boolean> => {
       },
       {
         type: 'text', // 'text' | 'barCode' | 'qrCode' | 'image' | 'table
-        value: `ИТОГО: ${orderCheck.totalAmount} тг`,
+        value: `ИТОГО: ${orderCheck.total_amount} тг`,
         style: {
           fontWeight: '700',
           textAlign: 'right',
@@ -408,7 +408,7 @@ export const printCheck = async (orderCheck: PreCheck): Promise<boolean> => {
       },
       {
         type: 'text', // 'text' | 'barCode' | 'qrCode' | 'image' | 'table
-        value: `ИТОГО СО СКИДКОЙ: ${orderCheck.totalAmount - (orderCheck.totalAmount / 100) * orderCheck.discount} тг`,
+        value: `ИТОГО СО СКИДКОЙ: ${orderCheck.total_amount - (orderCheck.total_amount / 100) * orderCheck.discount} тг`,
         style: {
           fontWeight: '700',
           textAlign: 'right',

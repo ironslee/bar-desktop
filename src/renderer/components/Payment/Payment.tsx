@@ -92,7 +92,7 @@ const Payment = ({
 
         if (tableOrder?.orderItems) {
           orderItemsData = tableOrder.orderItems.map((item) => ({
-            productId: item.product.id,
+            product_id: item.product.id,
             quantity: item.quantity,
             price: item.product.retprice,
             total: item.totalPrice,
@@ -101,11 +101,11 @@ const Payment = ({
 
         const closeOrderData: SaveOrderData = {
           number: tableOrder?.checkNumber ?? 0,
-          createdAt: new Date().toISOString(),
-          totalAmount,
-          discountId: tableOrder?.orderDiscount?.id ?? null,
-          discountTotalAmount: amountToPay,
-          paymentTypeId: paymentMethodValue,
+          created_at: new Date().toISOString(),
+          total_amount: totalAmount,
+          discount_id: tableOrder?.orderDiscount?.id ?? null,
+          discount_total_amount: amountToPay,
+          payment_type_id: paymentMethodValue,
           table_id: tableOrder.tableId,
           client: tableOrder.orderClient?.id ?? null,
           created_by: tableOrder.orderUser?.id ?? null,

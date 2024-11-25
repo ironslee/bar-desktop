@@ -22,7 +22,7 @@ const Tables = ({ onChangeModal, isTablesOpen }: TablesProps): JSX.Element => {
   const { selectedTable, tableOrders } = useAppSelector(
     (state: RootState) => state.tablesStore,
   );
-  const { items, totalAmount } = useAppSelector(
+  const { items, total_amount } = useAppSelector(
     (state: RootState) => state.orderStore,
   );
   const [tablesState, setTablesState] = useState<TableItem[]>([]);

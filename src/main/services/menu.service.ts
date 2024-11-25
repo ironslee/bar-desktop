@@ -19,17 +19,17 @@ export const getCategories = (): CategoryItem[] => {
   return categories as CategoryItem[];
 };
 
-export const getProductsByCategory = (categoryId: number): ProductItem[] => {
+export const getProductsByCategory = (category_id: number): ProductItem[] => {
   const db = connect();
   const productsQuery = db.prepare(
     `
-      SELECT id, name, vendorcodes, retprice, categoryId, link, statuses
+      SELECT id, name, vendorcodes, retprice, category_id, link, statuses
       FROM products
-      WHERE categoryId = ?;
+      WHERE category_id = ?;
     `,
   );
 
-  const products = productsQuery.all(categoryId);
+  const products = productsQuery.all(category_id);
 
   db.close();
 
@@ -41,7 +41,7 @@ export const getAllProducts = (): ProductItem[] => {
 
   const allProductsQuery = db.prepare(
     `
-      SELECT id, name, vendorcodes, retprice, categoryId, link, statuses
+      SELECT id, name, vendorcodes, retprice, category_id, link, statuses
       FROM products;
     `,
   );
@@ -57,7 +57,7 @@ export const getProductById = (id: number): ProductItem => {
   const db = connect();
   const productQuery = db.prepare(
     `
-      SELECT id, name, vendorcodes, retprice, categoryId, link, statuses
+      SELECT id, name, vendorcodes, retprice, category_id, link, statuses
       FROM products
       WHERE id = ?;
     `,

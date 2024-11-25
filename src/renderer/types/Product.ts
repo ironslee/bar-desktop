@@ -3,7 +3,7 @@ export interface ProductItem {
   name: string;
   vendorcodes: string;
   retprice: number;
-  categoryId: number;
+  category_id: number;
   link: string;
   statuses: number;
 }

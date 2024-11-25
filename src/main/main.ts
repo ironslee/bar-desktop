@@ -198,8 +198,8 @@ app
     });
     ipcMain.handle(
       MENU_GET_PRODUCTS_BY_CATEGORY,
-      async (_, categoryId: number) => {
-        return getProductsByCategory(categoryId);
+      async (_, category_id: number) => {
+        return getProductsByCategory(category_id);
       },
     );
     ipcMain.handle(MENU_GET_ALL_PRODUCTS, async () => {

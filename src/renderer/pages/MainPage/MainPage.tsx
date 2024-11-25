@@ -50,8 +50,8 @@ const MainPage = () => {
                   order.created_by
                     ? window.electron.getUserById(order.created_by)
                     : Promise.resolve(undefined),
-                  order.discountId
-                    ? window.electron.getDiscountById(order.discountId)
+                  order.discount_id
+                    ? window.electron.getDiscountById(order.discount_id)
                     : Promise.resolve(undefined),
                 ],
               );
@@ -59,7 +59,7 @@ const MainPage = () => {
               const orderItems: OrderItem[] = await Promise.all(
                 order.items.map(async (item) => {
                   const product: ProductItem =
-                    await window.electron.getProductById(item.productId);
+                    await window.electron.getProductById(item.product_id);
 
                   return {
                     product,

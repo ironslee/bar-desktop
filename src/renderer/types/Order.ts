@@ -20,11 +20,11 @@ export enum OrderStatus {
 export interface OrderDbItem {
   id: number;
   number: number;
-  createdAt: string;
-  totalAmount: number;
-  discountId: number;
-  discountTotalAmount: number;
-  paymentTypeId: number;
+  created_at: string;
+  total_amount: number;
+  discount_id: number;
+  discount_total_amount: number;
+  payment_type_id: number;
   table_id: number;
   client: number;
   created_by: number;
@@ -37,25 +37,25 @@ export interface OrderDbItemWithOrderItems extends OrderDbItem {
 
 export interface OrderItemsDbItem {
   id: number;
-  productId: number;
+  product_id: number;
   quantity: number;
   price: number;
-  orderId: number;
+  order_id: number;
 }
 
 export interface OrderItemData {
-  productId: number; // ID продукта
+  product_id: number; // ID продукта
   quantity: number; // Количество товара
   price: number; // Цена за единицу товара
 }
 
 export interface SaveOrderData {
   number?: number; // Номер чека
-  createdAt: string; // Дата создания
-  totalAmount: number; // Общая сумма заказа
-  discountId: number | null; // ID скидки, если есть
-  discountTotalAmount: number; // Сумма скидки
-  paymentTypeId: number | null; // Тип оплаты
+  created_at: string; // Дата создания
+  total_amount: number; // Общая сумма заказа
+  discount_id: number | null; // ID скидки, если есть
+  discount_total_amount: number; // Сумма скидки
+  payment_type_id: number | null; // Тип оплаты
   table_id: number; // ID стола
   client: number | null; // Имя клиента
   created_by: number | null; // Кто создал заказ (имя пользователя)
