@@ -21,17 +21,17 @@ export const saveOrder = (data: SaveOrderData) => {
     | { id: number }
     | undefined;
 
-  let orderId;
+  let order_id;
 
   if (existingOrder) {
     // Если заказ с таким номером существует, обновляем его
     const updateOrderQuery = db.prepare(`
       UPDATE orders SET
-        createdAt = @createdAt,
-        totalAmount = @totalAmount,
-        discountId = @discountId,
-        discountTotalAmount = @discountTotalAmount,
-        paymentTypeId = @paymentTypeId,
+        created_at = @created_at,
+        total_amount = @total_amount,
+        discount_id = @discount_id,
+        discount_total_amount = @discount_total_amount,
+        payment_type_id = @payment_type_id,
         table_id = @table_id,
         client = @client,
         created_by = @created_by,
@@ -40,62 +40,62 @@ export const saveOrder = (data: SaveOrderData) => {
     `);
 
     updateOrderQuery.run({ ...data, id: existingOrder.id });
-    orderId = existingOrder.id;
+    order_id = existingOrder.id;
   } else {
     // Если заказа нет, создаем новый
     const orderQuery = db.prepare(`
-      INSERT INTO orders (number, createdAt, totalAmount, discountId, discountTotalAmount, paymentTypeId, table_id, client, created_by, status)
-      VALUES (@number, @createdAt, @totalAmount, @discountId, @discountTotalAmount, @paymentTypeId, @table_id, @client, @created_by, @status)
+      INSERT INTO orders (number, created_at, total_amount, discount_id, discount_total_amount, payment_type_id, table_id, client, created_by, status)
+      VALUES (@number, @created_at, @total_amount, @discount_id, @discount_total_amount, @payment_type_id, @table_id, @client, @created_by, @status)
       RETURNING id;
     `);
 
-    orderId = orderQuery.run(data).lastInsertRowid;
+    order_id = orderQuery.run(data).lastInsertRowid;
 
     const updateNumberQuery = db.prepare(`
       UPDATE orders SET number = ? WHERE id = ?;
     `);
-    updateNumberQuery.run(orderId, orderId);
+    updateNumberQuery.run(order_id, order_id);
   }
 
   // Вставка или обновление позиций заказа
   const existingItemsQuery = db.prepare(`
-    SELECT * FROM orders_items WHERE orderId = ? AND productId = ?;
+    SELECT * FROM orders_items WHERE order_id = ? AND product_id = ?;
   `);
 
   const insertItem = db.prepare(`
-    INSERT INTO orders_items (productId, quantity, price, orderId)
-    VALUES (@productId, @quantity, @price, @orderId);
+    INSERT INTO orders_items (product_id, quantity, price, order_id)
+    VALUES (@product_id, @quantity, @price, @order_id);
   `);
 
   const updateItem = db.prepare(`
     UPDATE orders_items SET
       quantity = @quantity,
       price = @price
-    WHERE orderId = @orderId AND productId = @productId;
+    WHERE order_id = @order_id AND product_id = @product_id;
   `);
 
   // Обрабатываем каждый элемент заказа
   for (const item of data.orderItems) {
-    const existingItem = existingItemsQuery.get(orderId, item.productId);
+    const existingItem = existingItemsQuery.get(order_id, item.product_id);
 
     if (existingItem) {
       // Если позиция заказа существует, обновляем её
       updateItem.run({
         ...item,
-        orderId,
+        order_id,
       });
     } else {
       // Если позиции заказа нет, создаем новую
       insertItem.run({
         ...item,
-        orderId,
+        order_id,
       });
     }
   }
 
   db.close();
 
-  return orderId;
+  return order_id;
 };
 
 export const getOpenOrders = () => {
@@ -111,7 +111,7 @@ export const getOpenOrders = () => {
   // Если есть открытые заказы, получаем для них позиции
   const ordersWithItems = openOrders.map((order) => {
     const orderItemsQuery = db.prepare(`
-      SELECT * FROM orders_items WHERE orderId = ?;
+      SELECT * FROM orders_items WHERE order_id = ?;
     `);
     const orderItems = orderItemsQuery.all(order.id) as OrderItemsDbItem[];
 
@@ -145,11 +145,11 @@ export const closeOrder = (data: SaveOrderData) => {
   // Обновление заказа: статус на 'closed' и метод оплаты
   const updateOrderQuery = db.prepare(`
     UPDATE orders SET
-      createdAt = @createdAt,
-      totalAmount = @totalAmount,
-      discountId = @discountId,
-      discountTotalAmount = @discountTotalAmount,
-      paymentTypeId = @paymentTypeId,  -- запись типа оплаты
+      created_at = @created_at,
+      total_amount = @total_amount,
+      discount_id = @discount_id,
+      discount_total_amount = @discount_total_amount,
+      payment_type_id = @payment_type_id,  -- запись типа оплаты
       table_id = @table_id,
       client = @client,
       created_by = @created_by,
@@ -161,28 +161,28 @@ export const closeOrder = (data: SaveOrderData) => {
 
   // Обновление позиций заказа
   const insertItem = db.prepare(`
-    INSERT INTO orders_items (productId, quantity, price, orderId)
-    VALUES (@productId, @quantity, @price, @orderId);
+    INSERT INTO orders_items (product_id, quantity, price, order_id)
+    VALUES (@product_id, @quantity, @price, @order_id);
   `);
   const updateItem = db.prepare(`
     UPDATE orders_items SET
       quantity = @quantity,
       price = @price
-    WHERE orderId = @orderId AND productId = @productId;
+    WHERE order_id = @order_id AND product_id = @product_id;
   `);
   const existingItemsQuery = db.prepare(`
-    SELECT * FROM orders_items WHERE orderId = ? AND productId = ?;
+    SELECT * FROM orders_items WHERE order_id = ? AND product_id = ?;
   `);
 
   for (const item of data.orderItems) {
     const existingItem = existingItemsQuery.get(
       existingOrder.id,
-      item.productId,
+      item.product_id,
     );
     if (existingItem) {
-      updateItem.run({ ...item, orderId: existingOrder.id });
+      updateItem.run({ ...item, order_id: existingOrder.id });
     } else {
-      insertItem.run({ ...item, orderId: existingOrder.id });
+      insertItem.run({ ...item, order_id: existingOrder.id });
     }
   }
 

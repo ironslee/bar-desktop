@@ -150,7 +150,7 @@ const Order = (): JSX.Element => {
         .filter((item) => item.quantity - item.printedQuantity > 0)
         .map((item) => {
           const category = categories.find(
-            (cat) => cat.id === item.product.categoryId,
+            (cat) => cat.id === item.product.category_id,
           );
           return {
             name: item.product.name,
@@ -189,7 +189,7 @@ const Order = (): JSX.Element => {
   };
 
   // const discountedTotal =
-  //   discount > 0 ? totalAmount - (totalAmount / 100) * discount : totalAmount;
+  //   discount > 0 ? total_amount - (total_amount / 100) * discount : total_amount;
 
   const handlePrintPreCheck = async () => {
     try {
@@ -208,7 +208,7 @@ const Order = (): JSX.Element => {
         .map((item) => ({
           ...item,
           printedQuantity: item.quantity - item.printedQuantity, // только оставшиеся
-          productId: item.product.id,
+          product_id: item.product.id,
           price: item.product.retprice,
         }));
 
@@ -217,14 +217,14 @@ const Order = (): JSX.Element => {
         if (kitchenTicket && kitchenTicket.items.length > 0) {
           const newOrder = {
             number: tableOrder?.checkNumber ?? undefined, // Номер чека
-            createdAt: new Date().toISOString(), // Дата создания
-            totalAmount, // Общая сумма заказа
-            discountId: selectedDiscount?.id || null, // скдика
-            discountTotalAmount: selectedDiscount
+            created_at: new Date().toISOString(), // Дата создания
+            total_amount: totalAmount, // Общая сумма заказа
+            discount_id: selectedDiscount?.id || null, // скдика
+            discount_total_amount: selectedDiscount
               ? totalAmount -
                 (totalAmount / 100) * selectedDiscount.discount_value
               : totalAmount, // Сумма после скидки
-            paymentTypeId: null, // Тип оплаты
+            payment_type_id: null, // Тип оплаты
             table_id: tableId, // ID стола
             client: orderClient?.id || null, // Имя клиента
             created_by: orderUser?.id || null, // Имя пользователя, кто создал заказ

@@ -21,23 +21,23 @@ export const getDiscount = () => {
 export const getDiscountByOrderId = (number: number) => {
   const db = connect();
 
-  // Получаем discountId из таблицы orders по orderId
+  // Получаем discount_id из таблицы orders по orderId
   const orderQuery = db.prepare(`
 
-    SELECT discountId FROM orders WHERE number = ? AND status = 'open';
+    SELECT discount_id FROM orders WHERE number = ? AND status = 'open';
   `);
-  const order = orderQuery.get(number) as { discountId: number } | undefined;
+  const order = orderQuery.get(number) as { discount_id: number } | undefined;
 
   if (!order) {
     db.close();
     throw new Error(`Заказ с id ${number} не найден или не имеет скидки`);
   }
 
-  // Находим запись в таблице discount по discountId
+  // Находим запись в таблице discount по discount_id
   const discountQuery = db.prepare(`
     SELECT * FROM discount WHERE id = ?;
   `);
-  const discount = discountQuery.get(order.discountId);
+  const discount = discountQuery.get(order.discount_id);
 
   db.close();
 
@@ -62,18 +62,18 @@ export const getDiscountById = (id: number): DiscountItem => {
 };
 
 export const updateOpenOrderDiscount = (
-  discountId: number | null,
+  discount_id: number | null,
   orderNumber: number,
 ) => {
   const db = connect();
 
   const updateDiscountQuery = db.prepare(`
     UPDATE orders
-    SET discountId = ?
+    SET discount_id = ?
     WHERE number = ? AND status = 'open';
   `);
 
-  updateDiscountQuery.run(discountId, orderNumber);
+  updateDiscountQuery.run(discount_id, orderNumber);
 
   db.close();
 };

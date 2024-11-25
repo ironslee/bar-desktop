@@ -69,8 +69,8 @@ const electronHandler = {
   updateOpenOrderUser: (userId: number, orderNumber: number) =>
     ipcRenderer.invoke(USERS_UPDATE_OPEN_ORDER, userId, orderNumber),
   getCategories: () => ipcRenderer.invoke(MENU_GET_CATEGORIES),
-  getProductsByCategory: (categoryId: number) =>
-    ipcRenderer.invoke(MENU_GET_PRODUCTS_BY_CATEGORY, categoryId),
+  getProductsByCategory: (category_id: number) =>
+    ipcRenderer.invoke(MENU_GET_PRODUCTS_BY_CATEGORY, category_id),
   getAllProducts: () => ipcRenderer.invoke(MENU_GET_ALL_PRODUCTS),
   getProductById: (id: number) =>
     ipcRenderer.invoke(MENU_GET_PRODUCT_BY_ID, id),
