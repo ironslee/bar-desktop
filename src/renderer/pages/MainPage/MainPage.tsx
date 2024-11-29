@@ -9,12 +9,15 @@ import { Order } from '../../components/Order';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { OrderDbItemWithOrderItems, OrderItem } from '../../types/Order';
 import { ProductItem } from '../../types/Product';
+import { SignIn } from '../../components/SignIn';
 
 const MainPage = () => {
   const [isTablesOpen, setIsTablesOpen] = useState(false);
   const [isUsersOpen, setIsUsersOpen] = useState(false);
 
   const dispatch = useAppDispatch();
+  const tokens = useAppSelector((state) => state.uploadStore.tokens);
+
   const { selectedTable, tableOrders } = useAppSelector(
     (state: RootState) => state.tablesStore,
   );
@@ -92,6 +95,10 @@ const MainPage = () => {
     };
     fetchOpenOrders();
   }, [dispatch]);
+
+  if (!tokens.token) {
+    return <SignIn />;
+  }
 
   return (
     // <>

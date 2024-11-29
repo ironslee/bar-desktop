@@ -16,7 +16,7 @@ export interface PreCheck {
   table: string;
   user: string;
   client?: string;
-  totalAmount: number;
+  total_amount: number;
   discount: number;
   items: OrderItem[];
 }

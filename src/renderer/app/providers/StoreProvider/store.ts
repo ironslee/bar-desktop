@@ -6,6 +6,7 @@ import { menuReducer } from '../../../components/Menu';
 import { orderReducer } from '../../../components/Order';
 import { clientsReducer } from '../../../components/Clients';
 import { discountReducer } from '../../../components/Discount';
+import { uploadReducer } from '../../../pages/Upload';
 
 export const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ export const store = configureStore({
     orderStore: orderReducer,
     clientsStore: clientsReducer,
     discountStore: discountReducer,
+    uploadStore: uploadReducer,
   },
 });
 

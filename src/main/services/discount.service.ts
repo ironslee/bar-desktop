@@ -1,5 +1,11 @@
+import axios from 'axios';
 import { DiscountItem } from '../../renderer/types/Discount';
 import { connect } from './connectDb';
+import { apiUrl } from './main-constants';
+import { app } from 'electron';
+import path from 'path';
+import fs from 'fs';
+import csv from 'csv-parser';
 
 export const getDiscount = () => {
   const db = connect();
@@ -76,4 +82,82 @@ export const updateOpenOrderDiscount = (
   updateDiscountQuery.run(discount_id, orderNumber);
 
   db.close();
+};
+
+export const importDiscount = async (token: string) => {
+  try {
+    const response = await axios.post(
+      `${apiUrl}/desktop/discounts`,
+      {},
+      {
+        responseType: 'blob',
+        headers: {
+          authorization: `Bearer ${token}`,
+        },
+      },
+    );
+    const filePath =
+      process?.env?.NODE_ENV === 'development'
+        ? app.getAppPath() + '/discount.csv'
+        : path.join(process.resourcesPath, '/discount.csv');
+    fs.writeFileSync(filePath, response.data);
+
+    const result: any[] = [];
+
+    await fs
+      .createReadStream(filePath)
+      .pipe(
+        csv({
+          separator: ',',
+          mapHeaders: ({ header }) => {
+            return String(header).trim();
+          },
+        }),
+      )
+      .on('data', (data) => result.push(data))
+      .on('end', () => {
+        updateDiscount(result);
+      });
+
+    return true;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+};
+
+const updateDiscount = (discount: DiscountItem[]) => {
+  try {
+    const db = connect();
+
+    // Clear discount table
+    const clearDiscount = db.prepare(
+      `
+        DELETE FROM discount WHERE true;
+      `,
+    );
+
+    clearDiscount.run();
+
+    // Insert downloaded discount into discount table
+    const insert = db.prepare(`
+      INSERT INTO discount (id, discount_value)
+      VALUES (@id, @discount_value)
+    `);
+
+    const insertMany = db.transaction((discounts) => {
+      for (const discount of discounts) {
+        insert.run(discount);
+      }
+    });
+
+    insertMany(discount);
+
+    db.close();
+
+    return true;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
 };

@@ -119,7 +119,7 @@ const Payment = ({
           table: tableName ?? '',
           user: tableOrder.orderUser?.name ?? '',
           client: tableOrder.orderClient?.name ?? '',
-          totalAmount,
+          total_amount: totalAmount,
           discount: tableOrder.orderDiscount?.discount_value ?? 0,
           items: tableOrder.orderItems ?? [],
         });

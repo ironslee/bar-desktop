@@ -189,3 +189,72 @@ export const closeOrder = (data: SaveOrderData) => {
   db.close();
   return existingOrder.id;
 };
+
+export const getOrdersToUpload = () => {
+  const db = connect();
+
+  const ordersQuery = db.prepare(
+    `
+      SELECT *
+      FROM orders
+      WHERE uploaded = FALSE
+      ORDER BY id;
+    `,
+  );
+
+  const orders: any = ordersQuery.all();
+
+  const getProductsByOrderId = db.prepare(
+    `
+      SELECT *
+      FROM order_items
+      WHERE orderId = ?;
+    `,
+  );
+
+  const products: any[] = [];
+
+  console.log(orders);
+
+  for (const order of orders) {
+    const product = getProductsByOrderId.all(order.id);
+    products.push({
+      id: order.id,
+      number: order.number,
+      created_at: order.created_at,
+      total_amount: order.total_amount,
+      discount_id: order.discount_id,
+      discount_total_amount: order.discount_total_amount,
+      payment_type_id: order.payment_type_id,
+      table_id: order.table_id,
+      client: order.client,
+      created_by: order.created_by,
+      status: order.status,
+      items: product || [],
+    });
+  }
+
+  db.close();
+
+  return products;
+};
+
+export const setUploadedOrders = () => {
+  const db = connect();
+
+  const updateOrders = db.prepare(
+    `
+      UPDATE orders
+      SET uploaded = true,
+          uploaded_at = CURRENT_TIMESTAMP
+      WHERE
+        uploaded = false;
+    `,
+  );
+
+  const res = updateOrders.run();
+
+  db.close();
+
+  return res;
+};
