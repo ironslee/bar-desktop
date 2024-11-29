@@ -136,7 +136,7 @@ const Order = (): JSX.Element => {
         table: selectedTable.name,
         user: tableOrder.orderUser?.name || '',
         client: tableOrder.orderClient?.name || '',
-        totalAmount,
+        total_amount: totalAmount,
         discount: selectedDiscount?.discount_value ?? 0,
         items: tableOrderItems,
       });

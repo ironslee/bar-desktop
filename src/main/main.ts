@@ -14,26 +14,33 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
-import { getTables } from './services/tables.service';
+import { getTables, importTables } from './services/tables.service';
 import {
   CLIENTS_GET,
   CLIENTS_GET_BY_ID,
+  CLIENTS_IMPORT,
   CLIENTS_UPDATE_OPEN_ORDER,
   DISCOUNT_GET,
   DISCOUNT_GET_BY_ID,
   DISCOUNT_GET_ORDER_DISCOUNT,
+  DISCOUNT_IMPORT,
   DISCOUNT_UPDATE_OPEN_ORDER,
   MENU_GET_ALL_PRODUCTS,
   MENU_GET_CATEGORIES,
   MENU_GET_PRODUCT_BY_ID,
   MENU_GET_PRODUCTS_BY_CATEGORY,
+  MENU_IMPORT_CATEGORIES,
+  MENU_IMPORT_PRODUCTS,
   OPEN_ROUTE,
   ORDER_CLOSE,
   ORDER_GET_OPEN,
   ORDER_SAVE,
+  ORDERS_SET_UPLOADED,
+  ORDERS_UPLOAD,
   PRINT_CHECK,
   PRINT_KITCHEN_TICKET,
   TABLES_GET,
+  TABLES_IMPORT,
   USERS_GET,
   USERS_GET_BY_ID,
   USERS_UPDATE_OPEN_ORDER,
@@ -49,20 +56,24 @@ import {
   getCategories,
   getProductById,
   getProductsByCategory,
+  importCategories,
+  importProducts,
 } from './services/menu.service';
 import {
   getClientById,
   getClients,
+  importClients,
   updateOpenOrderClient,
 } from './services/clients.service';
 import { KitchenTicket, PreCheck } from '../renderer/types/Print';
 import { printCheck, printKitchenTicket } from './services/print.service';
 import { CloseOrderData, SaveOrderData } from '../renderer/types/Order';
-import { closeOrder, getOpenOrders, saveOrder } from './services/order.service';
+import { closeOrder, getOpenOrders, getOrdersToUpload, saveOrder, setUploadedOrders } from './services/order.service';
 import {
   getDiscount,
   getDiscountById,
   getDiscountByOrderId,
+  importDiscount,
   updateOpenOrderDiscount,
 } from './services/discount.service';
 
@@ -178,9 +189,15 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(() => {
+    // Tables
     ipcMain.handle(TABLES_GET, async () => {
       return getTables();
     });
+    ipcMain.handle(TABLES_IMPORT, async (_, token: string) => {
+      return importTables(token);
+    });
+
+    // Users
     ipcMain.handle(USERS_GET, async () => {
       return getUsers();
     });
@@ -193,6 +210,8 @@ app
         return updateOpenOrderUser(userId, orderNumber);
       },
     );
+
+    // Menu
     ipcMain.handle(MENU_GET_CATEGORIES, async () => {
       return getCategories();
     });
@@ -208,6 +227,14 @@ app
     ipcMain.handle(MENU_GET_PRODUCT_BY_ID, async (_, id: number) => {
       return getProductById(id);
     });
+    ipcMain.handle(MENU_IMPORT_CATEGORIES, async (_, token: string) => {
+      return importCategories(token);
+    });
+    ipcMain.handle(MENU_IMPORT_PRODUCTS, async (_, token: string) => {
+      return importProducts(token);
+    });
+
+    // Clients
     ipcMain.handle(CLIENTS_GET, async () => {
       return getClients();
     });
@@ -220,7 +247,11 @@ app
         return updateOpenOrderClient(clientId, orderNumber);
       },
     );
+    ipcMain.handle(CLIENTS_IMPORT, async (_, token: string) => {
+      return importClients(token);
+    });
 
+    // Discount
     ipcMain.handle(DISCOUNT_GET, async () => {
       return getDiscount();
     });
@@ -236,6 +267,9 @@ app
         return updateOpenOrderDiscount(discountId, orderNumber);
       },
     );
+    ipcMain.handle(DISCOUNT_IMPORT, async (_, token: string) => {
+      return importDiscount(token);
+    });
 
     //Order methods
     ipcMain.handle(ORDER_SAVE, async (_, data: SaveOrderData) => {
@@ -246,6 +280,12 @@ app
     });
     ipcMain.handle(ORDER_CLOSE, async (_, data: SaveOrderData) => {
       return closeOrder(data);
+    });
+    ipcMain.handle(ORDERS_UPLOAD, async (_) => {
+      return getOrdersToUpload();
+    });
+    ipcMain.handle(ORDERS_SET_UPLOADED, async (_) => {
+      return setUploadedOrders();
     });
 
     // Menu methods
