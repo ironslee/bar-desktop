@@ -60,7 +60,12 @@ export interface SaveOrderData {
   client: number | null; // Имя клиента
   created_by: number | null; // Кто создал заказ (имя пользователя)
   status: OrderStatus.OPEN | OrderStatus.CLOSED; // Статус заказа
-  orderItems: OrderItemData[]; // Позиции заказа (товары)
+  items: OrderItemData[]; // Позиции заказа (товары)
+}
+
+export interface OrderToUpload extends SaveOrderData {
+  id: number;
+  number: number;
 }
 
 export interface CloseOrderData extends SaveOrderData {

@@ -2,23 +2,26 @@ import { Button, Flex, Form, Input, Typography, message } from 'antd';
 import { ChangeEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { paymentTypesList, storeId } from 'renderer/helpers/renderer-constants';
+// import { paymentTypesList, storeId } from 'renderer/helpers/renderer-constants';
 
-import {
-  OrderToUpload,
-  UploadOrdersData,
-  UploadOrdersItem,
-  UploadOrdersResponseItem,
-} from 'types/Order';
-import { PaymentType, UploadOrdersPaymentItem } from 'types/Payment';
-import { UploadOrdersProductItem } from 'types/Product';
-import { User } from 'types/User';
+// import {
+//   OrderToUpload,
+//   UploadOrdersData,
+//   UploadOrdersItem,
+//   UploadOrdersResponseItem,
+// } from 'types/Order';
+// import { PaymentType, UploadOrdersPaymentItem } from 'types/Payment';
+// import { UploadOrdersProductItem } from 'types/Product';
+// import { User } from 'types/User';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { setTokens } from './Upload.slice';
 import { Routes } from '../../app/providers/RouterProvider';
 import { setLoading } from '../../components/Loader';
 import api from '../../helpers/axios.middleware';
+import { OrderToUpload } from '../../types/Order';
+import { apiUrl } from '../../helpers/renderer-constants';
+import { User } from '../../types/User';
 
 interface UploadProps {}
 
@@ -29,15 +32,15 @@ const Upload = ({}: UploadProps): JSX.Element => {
     password: '',
   });
   const [uploadLog, setUploadLog] = useState<string[]>([]);
-  const [user, setUser] = useState<User>({
-    username: '',
-    firstName: '',
-    lastName: '',
-    email: '',
-    role: null,
-    gender: null,
-    stores: null,
-  });
+  // const [user, setUser] = useState<User>({
+  //   username: '',
+  //   firstName: '',
+  //   lastName: '',
+  //   email: '',
+  //   role: null,
+  //   gender: null,
+  //   stores: null,
+  // });
   const tokens = useAppSelector((state) => state.uploadStore.tokens);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -96,7 +99,7 @@ const Upload = ({}: UploadProps): JSX.Element => {
     try {
       dispatch(setLoading(true));
 
-      const res = await api.get<User>(`/auth/me`);
+      const res = await api.get<User>(`/auth/users/me`);
       // setUser(res.data);
 
       dispatch(setLoading(false));
@@ -123,74 +126,23 @@ const Upload = ({}: UploadProps): JSX.Element => {
 
   const uploadOrders = async (orders: OrderToUpload[]) => {
     try {
-      const appId = await window.electron.getAppId();
+      // const appId = await window.electron.getAppId();
 
-      const data: UploadOrdersData = orders.reduce<UploadOrdersItem[]>(
+      const data: OrderToUpload[] = orders.reduce<OrderToUpload[]>(
         (acc, item) => {
           acc.push({
-            externalId: `${appId}-${item.orderId}`,
-            client: {
-              id: item.clientId,
-            },
-            isRetail: item.isRetail,
-            store: {
-              id: storeId,
-            },
-            totalAmount: item.totalAmount,
-            paymentList: paymentTypesList.reduce<UploadOrdersPaymentItem[]>(
-              (acc, payment) => {
-                switch (payment.code) {
-                  case PaymentType.CASH:
-                    acc.push({
-                      amount: item.cashAmount,
-                      paymentType: {
-                        id: payment.value,
-                      },
-                    });
-                    break;
-
-                  case PaymentType.CARD:
-                    acc.push({
-                      amount: item.cardAmount,
-                      paymentType: {
-                        id: payment.value,
-                      },
-                    });
-                    break;
-
-                  case PaymentType.DEPT:
-                    acc.push({
-                      amount: item.deptAmount,
-                      paymentType: {
-                        id: payment.value,
-                      },
-                    });
-                    break;
-
-                  default:
-                    break;
-                }
-
-                return acc;
-              },
-              [],
-            ),
-            saleItemList: item.products.reduce<UploadOrdersProductItem[]>(
-              (acc, product) => {
-                acc.push({
-                  product: {
-                    id: product.productId,
-                  },
-                  quantity: product.quantity,
-                });
-
-                return acc;
-              },
-              [],
-            ),
-            occurredOn: item.occurredOn,
-            beforeDiscountTotalAmount: item.beforeDiscountTotalAmount,
-            discountPercentage: item.discountPercentage,
+            id: item.id,
+            number: item.number,
+            created_at: item.created_at,
+            total_amount: item.total_amount,
+            discount_id: item.discount_id,
+            discount_total_amount: item.discount_total_amount,
+            payment_type_id: item.payment_type_id,
+            table_id: item.table_id,
+            client: item.client,
+            created_by: item.created_by,
+            status: item.status,
+            items: item.items,
           });
 
           return acc;
@@ -198,13 +150,11 @@ const Upload = ({}: UploadProps): JSX.Element => {
         [],
       );
 
-      const res = await api.post<UploadOrdersResponseItem[]>(
-        `/api/sales/batch`,
-        data,
-      );
+      const res = await api.post(`/desktop/orders`, data);
 
-      const savedOrders = res.data.reduce((acc, item) => {
+      const savedOrders = res.data.reduce((acc: any, item: any) => {
         if (item.isSaved) {
+          // eslint-disable-next-line no-param-reassign
           acc += 1;
         }
         return acc;
@@ -221,9 +171,10 @@ const Upload = ({}: UploadProps): JSX.Element => {
 
       let logMessage =
         savedOrders !== data.length ? 'Ошибки по заказам:\n' : '';
+      // eslint-disable-next-line no-restricted-syntax
       for (const result of res.data) {
         if (result.isSaved === false) {
-          logMessage += result.errorMessage + '\n';
+          logMessage += `${result.errorMessage}\n`;
         }
       }
 
@@ -260,8 +211,10 @@ const Upload = ({}: UploadProps): JSX.Element => {
   const downloadTablesCsv = async () => {
     try {
       const res = await window.electron.importTables(tokens.token);
-
-      return true;
+      if (res) {
+        return true;
+      }
+      return false;
     } catch (error: any) {
       console.log(error);
       setUploadLog((prev) => {
@@ -350,7 +303,7 @@ const Upload = ({}: UploadProps): JSX.Element => {
   };
 
   // eslint-disable-next-line consistent-return
-  const onUpdate = async () => {
+  const onOrdersUpload = async () => {
     try {
       setIsLoading(true);
 
@@ -380,6 +333,26 @@ const Upload = ({}: UploadProps): JSX.Element => {
         await window.electron.setUploadedOrders();
       }
 
+      // End message
+      setUploadLog((prev) => {
+        return [...prev, 'Готово'];
+      });
+      setIsLoading(false);
+    } catch (error: any) {
+      message.error(error?.response?.data?.message || 'Ошибка');
+      setUploadLog((prev) => {
+        return [...prev, 'Ошибка, попробуйте заново...'];
+      });
+      console.log(error);
+
+      setIsLoading(false);
+    }
+  };
+
+  // eslint-disable-next-line consistent-return
+  const onLocalBaseUpdate = async () => {
+    try {
+      setIsLoading(true);
       // Download tables from server
       setUploadLog((prev) => {
         return [
@@ -391,6 +364,9 @@ const Upload = ({}: UploadProps): JSX.Element => {
 
       if (downloadTables === false) {
         setIsLoading(false);
+        setUploadLog((prev) => {
+          return [...prev, 'Ошибка, попробуйте заново...'];
+        });
         return false;
       }
 
@@ -446,38 +422,6 @@ const Upload = ({}: UploadProps): JSX.Element => {
       const downloadDiscounts = await downloadDiscountsCsv();
 
       if (downloadDiscounts === false) {
-        setIsLoading(false);
-        return false;
-      }
-
-      // End message
-      setUploadLog((prev) => {
-        return [...prev, 'Готово'];
-      });
-      setIsLoading(false);
-    } catch (error: any) {
-      message.error(error?.response?.data?.message || 'Ошибка');
-      setUploadLog((prev) => {
-        return [...prev, 'Ошибка, попробуйте заново...'];
-      });
-      console.log(error);
-
-      setIsLoading(false);
-    }
-  };
-
-  // eslint-disable-next-line consistent-return
-  const onProductsUpdate = async () => {
-    try {
-      setIsLoading(true);
-
-      // Download products from server
-      setUploadLog(() => {
-        return ['Скачиваем товары с сервера и обновляем локальную БД...'];
-      });
-      const downloadProducts = await downloadProductsCsv();
-
-      if (downloadProducts === false) {
         setIsLoading(false);
         return false;
       }
@@ -614,9 +558,17 @@ const Upload = ({}: UploadProps): JSX.Element => {
         size="large"
         type="primary"
         loading={isLoading}
-        onClick={onUpdate}
+        onClick={onOrdersUpload}
       >
-        Обновить товары и заказы
+        Отправить заказы на сервер
+      </Button>
+      <Button
+        size="large"
+        type="primary"
+        loading={isLoading}
+        onClick={onLocalBaseUpdate}
+      >
+        Обновить локальную базу данных
       </Button>
 
       {uploadLog.length !== 0 && (

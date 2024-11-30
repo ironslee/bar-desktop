@@ -229,7 +229,7 @@ const Order = (): JSX.Element => {
             client: orderClient?.id || null, // Имя клиента
             created_by: orderUser?.id || null, // Имя пользователя, кто создал заказ
             status: OrderStatus.OPEN, // Статус заказа
-            orderItems: itemsToPrint, // Позиции заказа
+            items: itemsToPrint, // Позиции заказа
           };
 
           // Сохраняем заказ в базе данных

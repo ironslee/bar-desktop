@@ -2,7 +2,7 @@ import { Layout } from 'antd';
 import { CSSProperties, useEffect } from 'react';
 import { Outlet, useNavigate } from 'react-router-dom';
 import { IpcRendererEvent } from 'electron';
-import { OPEN_ROUTE } from '../../../shared/constants';
+import { OPEN_ROUTE } from '../../../main/services/main-constants';
 
 interface RootLayoutProps {
   children?: JSX.Element;

@@ -31,6 +31,7 @@ export const ORDER_CLOSE = 'order:closeOrder';
 export const ORDER_GET_OPEN = 'order:getOpenOrders';
 export const ORDERS_UPLOAD = 'orders:upload';
 export const ORDERS_SET_UPLOADED = 'orders:setUploaded';
+export const ORDERS_SET_UPLOADED_BY_ID = 'orders:setUploadedById';
 
 export const OPEN_ROUTE = 'openRoute';
 // export const PRINT_RECEIPT = 'print:receipt';

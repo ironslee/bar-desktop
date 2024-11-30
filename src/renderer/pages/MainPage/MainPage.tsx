@@ -96,9 +96,9 @@ const MainPage = () => {
     fetchOpenOrders();
   }, [dispatch]);
 
-  if (!tokens.token) {
-    return <SignIn />;
-  }
+  // if (!tokens.token) {
+  //   return <SignIn />;
+  // }
 
   return (
     // <>

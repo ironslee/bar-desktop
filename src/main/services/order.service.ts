@@ -7,6 +7,7 @@ import {
   OrderDbItemWithOrderItems,
   OrderItemsDbItem,
   OrderStatus,
+  OrderToUpload,
   SaveOrderData,
 } from '../../renderer/types/Order';
 
@@ -75,7 +76,7 @@ export const saveOrder = (data: SaveOrderData) => {
   `);
 
   // Обрабатываем каждый элемент заказа
-  for (const item of data.orderItems) {
+  for (const item of data.items) {
     const existingItem = existingItemsQuery.get(order_id, item.product_id);
 
     if (existingItem) {
@@ -174,7 +175,7 @@ export const closeOrder = (data: SaveOrderData) => {
     SELECT * FROM orders_items WHERE order_id = ? AND product_id = ?;
   `);
 
-  for (const item of data.orderItems) {
+  for (const item of data.items) {
     const existingItem = existingItemsQuery.get(
       existingOrder.id,
       item.product_id,
@@ -186,8 +187,19 @@ export const closeOrder = (data: SaveOrderData) => {
     }
   }
 
+  // Получение полной информации о заказе
+  const getOrderQuery = db.prepare(`
+    SELECT * FROM orders WHERE id = ?;
+  `);
+  const order = getOrderQuery.get(existingOrder.id) as OrderToUpload;
+  const getOrderItemsQuery = db.prepare(`
+    SELECT * FROM orders_items WHERE order_id = ?;
+  `);
+  const orderItems = getOrderItemsQuery.all(existingOrder.id);
+
   db.close();
-  return existingOrder.id;
+  // return existingOrder.id;
+  return { ...order, items: orderItems };
 };
 
 export const getOrdersToUpload = () => {
@@ -207,8 +219,8 @@ export const getOrdersToUpload = () => {
   const getProductsByOrderId = db.prepare(
     `
       SELECT *
-      FROM order_items
-      WHERE orderId = ?;
+      FROM orders_items
+      WHERE order_id = ?;
     `,
   );
 
@@ -253,6 +265,26 @@ export const setUploadedOrders = () => {
   );
 
   const res = updateOrders.run();
+
+  db.close();
+
+  return res;
+};
+
+export const setUploadedOrderById = (orderId: number) => {
+  const db = connect();
+
+  const updateOrder = db.prepare(
+    `
+      UPDATE orders
+      SET uploaded = true,
+          uploaded_at = CURRENT_TIMESTAMP
+      WHERE
+        id = ?;
+    `,
+  );
+
+  const res = updateOrder.run(orderId);
 
   db.close();
 
