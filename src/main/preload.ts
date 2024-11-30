@@ -22,6 +22,7 @@ import {
   ORDER_GET_OPEN,
   ORDER_SAVE,
   ORDERS_SET_UPLOADED,
+  ORDERS_SET_UPLOADED_BY_ID,
   ORDERS_UPLOAD,
   PRINT_CHECK,
   PRINT_KITCHEN_TICKET,
@@ -44,7 +45,7 @@ import {
 import { KitchenTicket, PreCheck } from '../renderer/types/Print';
 import { printCheck, printKitchenTicket } from './services/print.service';
 import { CloseOrderData, SaveOrderData } from '../renderer/types/Order';
-import { saveOrder } from './services/order.service';
+import { saveOrder, setUploadedOrderById } from './services/order.service';
 import { getUserById, updateOpenOrderUser } from './services/users.service';
 import {
   getDiscount,
@@ -110,6 +111,8 @@ const electronHandler = {
   getOpenOrders: () => ipcRenderer.invoke(ORDER_GET_OPEN),
   getOrdersToUpload: () => ipcRenderer.invoke(ORDERS_UPLOAD),
   setUploadedOrders: () => ipcRenderer.invoke(ORDERS_SET_UPLOADED),
+  setUploadedOrderById: (orderId: number) =>
+    ipcRenderer.invoke(ORDERS_SET_UPLOADED_BY_ID, orderId),
   printKitchenTicket: (kitchenTicket: KitchenTicket): Promise<boolean> =>
     ipcRenderer.invoke(PRINT_KITCHEN_TICKET, kitchenTicket),
   printCheck: (orderCheck: PreCheck): Promise<boolean> =>

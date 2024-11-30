@@ -36,6 +36,7 @@ import {
   ORDER_GET_OPEN,
   ORDER_SAVE,
   ORDERS_SET_UPLOADED,
+  ORDERS_SET_UPLOADED_BY_ID,
   ORDERS_UPLOAD,
   PRINT_CHECK,
   PRINT_KITCHEN_TICKET,
@@ -68,7 +69,14 @@ import {
 import { KitchenTicket, PreCheck } from '../renderer/types/Print';
 import { printCheck, printKitchenTicket } from './services/print.service';
 import { CloseOrderData, SaveOrderData } from '../renderer/types/Order';
-import { closeOrder, getOpenOrders, getOrdersToUpload, saveOrder, setUploadedOrders } from './services/order.service';
+import {
+  closeOrder,
+  getOpenOrders,
+  getOrdersToUpload,
+  saveOrder,
+  setUploadedOrderById,
+  setUploadedOrders,
+} from './services/order.service';
 import {
   getDiscount,
   getDiscountById,
@@ -286,6 +294,9 @@ app
     });
     ipcMain.handle(ORDERS_SET_UPLOADED, async (_) => {
       return setUploadedOrders();
+    });
+    ipcMain.handle(ORDERS_SET_UPLOADED_BY_ID, async (_, orderId: number) => {
+      return setUploadedOrderById(orderId);
     });
 
     // Menu methods

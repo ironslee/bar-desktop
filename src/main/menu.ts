@@ -5,6 +5,7 @@ import {
   BrowserWindow,
   MenuItemConstructorOptions,
 } from 'electron';
+import { OPEN_ROUTE } from './services/main-constants';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;
@@ -54,29 +55,20 @@ export default class MenuBuilder {
 
   buildDarwinTemplate(): MenuItemConstructorOptions[] {
     const subMenuAbout: DarwinMenuItemConstructorOptions = {
-      label: 'Electron',
+      label: 'Бариста',
       submenu: [
         {
-          label: 'About ElectronReact',
-          selector: 'orderFrontStandardAboutPanel:',
+          label: 'Главная',
+          click: () => this.mainWindow.webContents.send(OPEN_ROUTE, '/'),
         },
         { type: 'separator' },
-        { label: 'Services', submenu: [] },
+        {
+          label: 'Загрузка заказов и базы',
+          click: () => this.mainWindow.webContents.send(OPEN_ROUTE, '/upload'),
+        },
         { type: 'separator' },
         {
-          label: 'Hide ElectronReact',
-          accelerator: 'Command+H',
-          selector: 'hide:',
-        },
-        {
-          label: 'Hide Others',
-          accelerator: 'Command+Shift+H',
-          selector: 'hideOtherApplications:',
-        },
-        { label: 'Show All', selector: 'unhideAllApplications:' },
-        { type: 'separator' },
-        {
-          label: 'Quit',
+          label: 'Выйти',
           accelerator: 'Command+Q',
           click: () => {
             app.quit();
@@ -189,7 +181,7 @@ export default class MenuBuilder {
         ? subMenuViewDev
         : subMenuViewProd;
 
-    return [subMenuAbout, subMenuEdit, subMenuView, subMenuWindow, subMenuHelp];
+    return [subMenuAbout, subMenuView, subMenuWindow];
   }
 
   buildDefaultTemplate() {
@@ -198,15 +190,13 @@ export default class MenuBuilder {
         label: '&File',
         submenu: [
           {
-            label: '&Open',
-            accelerator: 'Ctrl+O',
+            label: 'Главная',
+            click: () => this.mainWindow.webContents.send(OPEN_ROUTE, '/'),
           },
           {
-            label: '&Close',
-            accelerator: 'Ctrl+W',
-            click: () => {
-              this.mainWindow.close();
-            },
+            label: 'Загрузка заказов и базы',
+            click: () =>
+              this.mainWindow.webContents.send(OPEN_ROUTE, '/upload'),
           },
         ],
       },

@@ -16,6 +16,7 @@ import {
 } from 'antd';
 import { useSelector } from 'react-redux'; // Для подключения к Redux
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { RootState } from '../../app/providers/StoreProvider';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import {
@@ -28,6 +29,8 @@ import {
 import { Routes } from '../../app/providers/RouterProvider';
 import { Check } from '../Check';
 import { PaymentTypeEnum } from '../../types/Payment';
+import { apiUrl } from '../../helpers/renderer-constants';
+import api from '../../helpers/axios.middleware';
 
 const { Text, Title } = Typography;
 
@@ -73,6 +76,18 @@ const Payment = ({
     setPaymentMethod(e.target.value);
   };
 
+  // const isInternetAvailable = async (url: string = `${apiUrl}`) => {
+  //   try {
+  //     const response = await axios.get(url, { timeout: 5000 }); // Таймаут 5 секунд
+  //     console.error(response);
+
+  //     return response.status === 200; // Проверяем, что сервер вернул статус 200
+  //   } catch (error) {
+  //     console.error('Нет соединения с интернетом:', error.message);
+  //     return false; // Если запрос не прошёл, интернета нет
+  //   }
+  // };
+
   const tableName = useAppSelector((state: RootState) => {
     const table = state.tablesStore.tables.find(
       (order) => order.id === tableId,
@@ -110,7 +125,7 @@ const Payment = ({
           client: tableOrder.orderClient?.id ?? null,
           created_by: tableOrder.orderUser?.id ?? null,
           status: OrderStatus.CLOSED,
-          orderItems: orderItemsData,
+          items: orderItemsData,
         };
 
         const response = await window.electron.closeOrder(closeOrderData);
@@ -125,6 +140,24 @@ const Payment = ({
         });
 
         if (response) {
+          // const data = {
+          //   id: response.id,
+          //   number: response.number,
+          //   created_at: response.created_at,
+          //   total_amount: response.total_amount,
+          //   discount_id: response.discount_id,
+          //   discount_total_amount: response.discount_total_amount,
+          //   payment_type_id: response.payment_type_id,
+          //   table_id: response.table_id,
+          //   client: response.client,
+          //   created_by: response.created_by,
+          //   status: response.status,
+          //   items: response.items,
+          // };
+          // if (internet) {
+          //   const res = await api.post(`/desktop/orders`, data);
+          // await window.electron.setUploadedOrderById(response.id);
+          // }
           await message.success('Оплата успешно завершена!');
           onChangeModal(); // Закрываем окно оплаты
           window.location.href = '/';
