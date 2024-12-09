@@ -90,9 +90,9 @@ const Clients = ({ onChangeModal, isOpen }: ClientsProps): JSX.Element => {
       <Button
         type="primary"
         onClick={() => onChangeModal()}
-        style={{ width: '100%', fontSize: '17px' }}
+        style={{ width: '100%', fontSize: '17px', maxWidth: '180px' }}
       >
-        {selectedClient ? `Клиент ${selectedClient.name}` : 'Клиент не выбран'}
+        {selectedClient ? `${selectedClient.name}` : 'Клиент не выбран'}
       </Button>
       <Modal open={isOpen} footer={null} onCancel={onChangeModal}>
         <Typography.Title level={3}>Выберите пользователя</Typography.Title>

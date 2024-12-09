@@ -30,6 +30,7 @@ import {
   TABLES_IMPORT,
   USERS_GET,
   USERS_GET_BY_ID,
+  USERS_IMPORT,
   USERS_UPDATE_OPEN_ORDER,
 } from './services/main-constants';
 import {
@@ -46,7 +47,11 @@ import { KitchenTicket, PreCheck } from '../renderer/types/Print';
 import { printCheck, printKitchenTicket } from './services/print.service';
 import { CloseOrderData, SaveOrderData } from '../renderer/types/Order';
 import { saveOrder, setUploadedOrderById } from './services/order.service';
-import { getUserById, updateOpenOrderUser } from './services/users.service';
+import {
+  getUserById,
+  importUsers,
+  updateOpenOrderUser,
+} from './services/users.service';
 import {
   getDiscount,
   getDiscountById,
@@ -78,18 +83,17 @@ const electronHandler = {
     },
   },
   getTables: () => ipcRenderer.invoke(TABLES_GET),
-  importTables: (token: string) => ipcRenderer.invoke(TABLES_IMPORT, token),
+  importTables: () => ipcRenderer.invoke(TABLES_IMPORT),
   getUsers: () => ipcRenderer.invoke(USERS_GET),
   getUserById: (userId: number) => ipcRenderer.invoke(USERS_GET_BY_ID, userId),
   updateOpenOrderUser: (userId: number, orderNumber: number) =>
     ipcRenderer.invoke(USERS_UPDATE_OPEN_ORDER, userId, orderNumber),
+  importUsers: () => ipcRenderer.invoke(USERS_IMPORT),
   getCategories: () => ipcRenderer.invoke(MENU_GET_CATEGORIES),
   getProductsByCategory: (category_id: number) =>
     ipcRenderer.invoke(MENU_GET_PRODUCTS_BY_CATEGORY, category_id),
-  importCategories: (token: string) =>
-    ipcRenderer.invoke(MENU_IMPORT_CATEGORIES, token),
-  importProducts: (token: string) =>
-    ipcRenderer.invoke(MENU_IMPORT_PRODUCTS, token),
+  importCategories: () => ipcRenderer.invoke(MENU_IMPORT_CATEGORIES),
+  importProducts: () => ipcRenderer.invoke(MENU_IMPORT_PRODUCTS),
   getAllProducts: () => ipcRenderer.invoke(MENU_GET_ALL_PRODUCTS),
   getProductById: (id: number) =>
     ipcRenderer.invoke(MENU_GET_PRODUCT_BY_ID, id),
@@ -98,14 +102,14 @@ const electronHandler = {
     ipcRenderer.invoke(CLIENTS_GET_BY_ID, clientId),
   updateOpenOrderClient: (clientId: number, orderNumber: number) =>
     ipcRenderer.invoke(CLIENTS_UPDATE_OPEN_ORDER, clientId, orderNumber),
-  importClients: (token: string) => ipcRenderer.invoke(CLIENTS_IMPORT, token),
+  importClients: () => ipcRenderer.invoke(CLIENTS_IMPORT),
   getDiscount: () => ipcRenderer.invoke(DISCOUNT_GET),
   getDiscountByOrderId: (number: number) =>
     ipcRenderer.invoke(DISCOUNT_GET_ORDER_DISCOUNT, number),
   getDiscountById: (id: number) => ipcRenderer.invoke(DISCOUNT_GET_BY_ID, id),
   updateOpenOrderDiscount: (discountId: number | null, orderNumber: number) =>
     ipcRenderer.invoke(DISCOUNT_UPDATE_OPEN_ORDER, discountId, orderNumber),
-  importDiscount: (token: string) => ipcRenderer.invoke(DISCOUNT_IMPORT, token),
+  importDiscount: () => ipcRenderer.invoke(DISCOUNT_IMPORT),
   saveOrder: (data: SaveOrderData) => ipcRenderer.invoke(ORDER_SAVE, data),
   closeOrder: (data: SaveOrderData) => ipcRenderer.invoke(ORDER_CLOSE, data),
   getOpenOrders: () => ipcRenderer.invoke(ORDER_GET_OPEN),

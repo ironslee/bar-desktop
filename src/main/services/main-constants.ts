@@ -4,6 +4,7 @@ export const TABLES_IMPORT = 'tables:import';
 export const USERS_GET = 'users:get';
 export const USERS_GET_BY_ID = 'users:getById';
 export const USERS_UPDATE_OPEN_ORDER = 'users:updateOpenOrder';
+export const USERS_IMPORT = 'users:import';
 
 export const MENU_GET_CATEGORIES = 'menu:getCategories';
 export const MENU_GET_PRODUCTS_BY_CATEGORY = 'menu:getProductsByCategory';

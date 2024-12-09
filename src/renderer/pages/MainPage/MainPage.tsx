@@ -7,13 +7,27 @@ import { Users } from '../../components/Users';
 import { Menu } from '../../components/Menu';
 import { Order } from '../../components/Order';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
-import { OrderDbItemWithOrderItems, OrderItem } from '../../types/Order';
+import {
+  OrderDbItemWithOrderItems,
+  OrderItem,
+  OrderToUpload,
+} from '../../types/Order';
 import { ProductItem } from '../../types/Product';
 import { SignIn } from '../../components/SignIn';
+import { Synchro } from '../Synchro';
+import { setTokens } from '../Upload';
+import { setLoading } from '../../components/Loader';
+import { User } from '../../types/User';
+import api from '../../helpers/axios.middleware';
 
 const MainPage = () => {
   const [isTablesOpen, setIsTablesOpen] = useState(false);
   const [isUsersOpen, setIsUsersOpen] = useState(false);
+  const [showSynchro, setShowSynchro] = useState(false);
+  const [user, setUser] = useState<User>({
+    user_id: 0,
+    username: '',
+  });
 
   const dispatch = useAppDispatch();
   const tokens = useAppSelector((state) => state.uploadStore.tokens);
@@ -36,6 +50,62 @@ const MainPage = () => {
   const onChangeUsersModal = () => {
     setIsUsersOpen(!isUsersOpen);
   };
+
+  useEffect(() => {
+    if (tokens.access_token) {
+      console.log('ww', tokens);
+      // eslint-disable-next-line no-use-before-define
+      getAccountInfo();
+      // eslint-disable-next-line no-use-before-define
+      synchroOrders();
+    }
+  }, [tokens]);
+
+  useEffect(() => {
+    try {
+      const localTokens = window.localStorage.getItem('tokens');
+      const parsedTokens = localTokens ? JSON.parse(localTokens) : null;
+      console.log('parsed', parsedTokens);
+
+      // if (parsedTokens && tokens.access_token === '') {
+      if (parsedTokens) {
+        dispatch(setTokens(parsedTokens));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    // eslint-disable-next-line no-use-before-define
+    // synchroOrders();
+    console.log('exp Orders', 'showSync', showSynchro);
+    console.log('tokens', tokens);
+  }, []);
+
+  // eslint-disable-next-line consistent-return
+  const synchroOrders = async () => {
+    // if (tokens.access_token !== '' && tokens.access_token) {
+    if (tokens.access_token) {
+      const notUploadedOrders: OrderToUpload[] =
+        await window.electron.getOrdersToUpload();
+      console.log('ordersToSynchro', notUploadedOrders.length);
+
+      if (notUploadedOrders.length > 0) {
+        setShowSynchro(true);
+        return notUploadedOrders;
+      }
+    }
+    return [];
+  };
+
+  // if (tokens.access_token !== '' && tokens.access_token) {
+  //   synchroOrders();
+  //   console.log('synchro');
+  // }
+
+  // useEffect(() => {
+  //   if (tokens.access_token !== '' && tokens.access_token) {
+  //     console.log('synchro');
+  //   }
+  // }, []);
 
   useEffect(() => {
     const fetchOpenOrders = async () => {
@@ -96,9 +166,34 @@ const MainPage = () => {
     fetchOpenOrders();
   }, [dispatch]);
 
-  // if (!tokens.token) {
-  //   return <SignIn />;
-  // }
+  const getAccountInfo = async () => {
+    try {
+      dispatch(setLoading(true));
+
+      const res = await api.get<User>(`/auth/users/me`);
+      setUser(res.data);
+
+      dispatch(setLoading(false));
+    } catch (error: any) {
+      console.log(error);
+      message.error(error?.response?.data?.message || 'Ошибка');
+
+      // eslint-disable-next-line no-use-before-define
+      // logout();
+
+      dispatch(setLoading(false));
+    }
+  };
+
+  if (tokens.access_token === '' || !tokens.access_token) {
+    console.log('asd', tokens);
+    return <SignIn />;
+  }
+
+  if (showSynchro && tokens.access_token !== '' && tokens.access_token) {
+    console.log('asd', tokens);
+    return <Synchro />;
+  }
 
   return (
     // <>

@@ -77,44 +77,32 @@ export const getProductById = (id: number): ProductItem => {
 };
 
 // Import categories
-export const importCategories = async (token: string) => {
+export const importCategories = async () => {
   try {
-    const response = await axios.post(
-      `${apiUrl}/desktop/categories`,
-      {},
-      {
-        responseType: 'blob',
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      },
-    );
-    const filePath =
-      process?.env?.NODE_ENV === 'development'
-        ? app.getAppPath() + '/categories.csv'
-        : path.join(process.resourcesPath, '/categories.csv');
-    fs.writeFileSync(filePath, response.data);
+    const response = await axios.get(`${apiUrl}/desktop/categories`);
 
-    const result: any[] = [];
+    if (!Array.isArray(response.data)) {
+      throw new Error('Ответ сервера не содержит массив объектов');
+    }
 
-    await fs
-      .createReadStream(filePath)
-      .pipe(
-        csv({
-          separator: ',',
-          mapHeaders: ({ header }) => {
-            return String(header).trim();
-          },
-        }),
-      )
-      .on('data', (data) => result.push(data))
-      .on('end', () => {
-        updateCategories(result);
-      });
+    const categories = await response.data.map((category: CategoryItem) => ({
+      id: category.id,
+      name: category.name,
+      link: category.link,
+      print_cat: category.print_cat,
+    }));
 
+    // db tables update
+    const success = await updateCategories(categories);
+
+    if (!success) {
+      throw new Error('Ошибка обновления таблиц в базе данных');
+    }
+
+    console.log('Таблицы успешно импортированы и обновлены.');
     return true;
   } catch (error) {
-    console.log(error);
+    console.error('Ошибка импорта таблиц:', error);
     return false;
   }
 };
@@ -122,6 +110,9 @@ export const importCategories = async (token: string) => {
 const updateCategories = (categories: CategoryItem[]) => {
   try {
     const db = connect();
+
+    // Foreign key verification off
+    db.prepare('PRAGMA foreign_keys = OFF;').run();
 
     // Clear categories table
     const clearCategories = db.prepare(
@@ -146,6 +137,9 @@ const updateCategories = (categories: CategoryItem[]) => {
 
     insertMany(categories);
 
+    // Foreign key verification on
+    db.prepare('PRAGMA foreign_keys = ON;').run();
+
     db.close();
 
     return true;
@@ -156,44 +150,35 @@ const updateCategories = (categories: CategoryItem[]) => {
 };
 
 // Import products
-export const importProducts = async (token: string) => {
+export const importProducts = async () => {
   try {
-    const response = await axios.post(
-      `${apiUrl}/desktop/products`,
-      {},
-      {
-        responseType: 'blob',
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      },
-    );
-    const filePath =
-      process?.env?.NODE_ENV === 'development'
-        ? app.getAppPath() + '/products.csv'
-        : path.join(process.resourcesPath, '/products.csv');
-    fs.writeFileSync(filePath, response.data);
+    const response = await axios.get(`${apiUrl}/desktop/products`);
 
-    const result: any[] = [];
+    if (!Array.isArray(response.data)) {
+      throw new Error('Ответ сервера не содержит массив объектов');
+    }
 
-    await fs
-      .createReadStream(filePath)
-      .pipe(
-        csv({
-          separator: ',',
-          mapHeaders: ({ header }) => {
-            return String(header).trim();
-          },
-        }),
-      )
-      .on('data', (data) => result.push(data))
-      .on('end', () => {
-        updateProducts(result);
-      });
+    const products = await response.data.map((product: ProductItem) => ({
+      id: product.id,
+      name: product.name,
+      vendorcodes: product.vendorcodes,
+      retprice: product.retprice,
+      category_id: product.category_id,
+      link: product.link,
+      statuses: product.statuses,
+    }));
 
+    // db tables update
+    const success = await updateProducts(products);
+
+    if (!success) {
+      throw new Error('Ошибка обновления таблиц в базе данных');
+    }
+
+    console.log('Таблицы успешно импортированы и обновлены.');
     return true;
   } catch (error) {
-    console.log(error);
+    console.error('Ошибка импорта таблиц:', error);
     return false;
   }
 };
@@ -201,6 +186,9 @@ export const importProducts = async (token: string) => {
 const updateProducts = (products: ProductItem[]) => {
   try {
     const db = connect();
+
+    // Foreign key verification off
+    db.prepare('PRAGMA foreign_keys = OFF;').run();
 
     // Clear products table
     const clearProducts = db.prepare(
@@ -224,6 +212,9 @@ const updateProducts = (products: ProductItem[]) => {
     });
 
     insertMany(products);
+
+    // Foreign key verification on
+    db.prepare('PRAGMA foreign_keys = ON;').run();
 
     db.close();
 

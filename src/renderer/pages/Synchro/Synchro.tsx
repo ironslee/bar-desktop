@@ -1,32 +1,19 @@
 import { Button, Flex, Form, Input, Typography, message } from 'antd';
 import { ChangeEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-// import { paymentTypesList, storeId } from 'renderer/helpers/renderer-constants';
-
-// import {
-//   OrderToUpload,
-//   UploadOrdersData,
-//   UploadOrdersItem,
-//   UploadOrdersResponseItem,
-// } from 'types/Order';
-// import { PaymentType, UploadOrdersPaymentItem } from 'types/Payment';
-// import { UploadOrdersProductItem } from 'types/Product';
-// import { User } from 'types/User';
 import { useAppSelector } from '../../hooks/useAppSelector';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
-import { setTokens } from './Upload.slice';
 import { Routes } from '../../app/providers/RouterProvider';
 import { setLoading } from '../../components/Loader';
 import api from '../../helpers/axios.middleware';
 import { OrderToUpload } from '../../types/Order';
 import { apiUrl } from '../../helpers/renderer-constants';
 import { User } from '../../types/User';
-import { SignIn } from '../../components/SignIn';
+import { setTokens } from '../Upload/Upload.slice';
 
 interface UploadProps {}
 
-const Upload = ({}: UploadProps): JSX.Element => {
+const Synchro = ({}: UploadProps): JSX.Element => {
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     phone: '',
@@ -40,12 +27,25 @@ const Upload = ({}: UploadProps): JSX.Element => {
   const tokens = useAppSelector((state) => state.uploadStore.tokens);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const [isSynchroRunning, setIsSynchroRunning] = useState(false);
+
+  // useEffect(() => {
+  //   if (tokens.access_token) {
+  //     console.log(tokens);
+  //     // eslint-disable-next-line no-use-before-define
+  //     getAccountInfo();
+  //     // eslint-disable-next-line no-use-before-define
+  //     onOrdersUpload();
+  //   }
+  // }, [tokens]);
 
   useEffect(() => {
-    if (tokens.access_token) {
-      console.log('ww', tokens);
+    if (tokens.access_token && !isSynchroRunning) {
+      setIsSynchroRunning(true); // Предотвращает повторное выполнение
       // eslint-disable-next-line no-use-before-define
-      getAccountInfo();
+      // getAccountInfo();
+      // eslint-disable-next-line no-use-before-define
+      onOrdersUpload();
     }
   }, [tokens]);
 
@@ -66,32 +66,6 @@ const Upload = ({}: UploadProps): JSX.Element => {
     }
   }, []);
 
-  // const onFinish = async () => {
-  //   try {
-  //     dispatch(setLoading(true));
-
-  //     const data = {
-  //       password: formData.password,
-  //       username: formData.phone.replace(/[^0-9]/g, '').slice(1),
-  //     };
-
-  //     const res = await api.post(`/auth/signin`, data);
-
-  //     dispatch(setTokens(res.data));
-  //     window.localStorage.setItem('tokens', JSON.stringify(res.data));
-
-  //     dispatch(setLoading(false));
-  //     message.success('Авторизация прошла успешно');
-  //   } catch (error: any) {
-  //     console.log(error);
-  //     message.error(error?.response?.data?.message || 'Ошибка');
-
-  //     logout();
-
-  //     dispatch(setLoading(false));
-  //   }
-  // };
-
   const getAccountInfo = async () => {
     try {
       dispatch(setLoading(true));
@@ -103,9 +77,6 @@ const Upload = ({}: UploadProps): JSX.Element => {
     } catch (error: any) {
       console.log(error);
       message.error(error?.response?.data?.message || 'Ошибка');
-
-      // eslint-disable-next-line no-use-before-define
-      // logout();
 
       dispatch(setLoading(false));
     }
@@ -204,122 +175,11 @@ const Upload = ({}: UploadProps): JSX.Element => {
     }
   };
 
-  const downloadTablesCsv = async () => {
-    try {
-      const res = await window.electron.importTables();
-
-      // if (res) {
-      // return true;
-      // }
-      return res;
-    } catch (error: any) {
-      console.log(error);
-      setUploadLog((prev) => {
-        return [
-          ...prev,
-          error?.response?.data?.message || 'Ошибка загрузки столов с сервера',
-        ];
-      });
-
-      return false;
-    }
-  };
-
-  const downloadCategoriesCsv = async () => {
-    try {
-      const res = await window.electron.importCategories();
-
-      return res;
-    } catch (error: any) {
-      console.log(error);
-      setUploadLog((prev) => {
-        return [
-          ...prev,
-          error?.response?.data?.message ||
-            'Ошибка загрузки категорий с сервера',
-        ];
-      });
-
-      return false;
-    }
-  };
-
-  const downloadProductsCsv = async () => {
-    try {
-      const res = await window.electron.importProducts();
-
-      return res;
-    } catch (error: any) {
-      console.log(error);
-      setUploadLog((prev) => {
-        return [
-          ...prev,
-          error?.response?.data?.message || 'Ошибка загрузки блюд с сервера',
-        ];
-      });
-
-      return false;
-    }
-  };
-
-  const downloadClientsCsv = async () => {
-    try {
-      const res = await window.electron.importClients();
-
-      return res;
-    } catch (error: any) {
-      console.log(error);
-      setUploadLog((prev) => {
-        return [
-          ...prev,
-          error?.response?.data?.message ||
-            'Ошибка загрузки клиентов с сервера',
-        ];
-      });
-
-      return false;
-    }
-  };
-
-  const downloadDiscountsCsv = async () => {
-    try {
-      const res = await window.electron.importDiscount();
-
-      return res;
-    } catch (error: any) {
-      console.log(error);
-      setUploadLog((prev) => {
-        return [
-          ...prev,
-          error?.response?.data?.message || 'Ошибка загрузки скидок с сервера',
-        ];
-      });
-
-      return false;
-    }
-  };
-
-  const downloadUsers = async () => {
-    try {
-      const res = await window.electron.importUsers();
-
-      return res;
-    } catch (error: any) {
-      console.log(error);
-      setUploadLog((prev) => {
-        return [
-          ...prev,
-          error?.response?.data?.message ||
-            'Ошибка загрузки пользователей с сервера',
-        ];
-      });
-
-      return false;
-    }
-  };
+  let isUploading = false;
 
   // eslint-disable-next-line consistent-return
   const onOrdersUpload = async () => {
+    if (isUploading) return; // Предотвращает повторный запуск
     try {
       setIsLoading(true);
 
@@ -346,7 +206,7 @@ const Upload = ({}: UploadProps): JSX.Element => {
 
         if (uploadResult === false) {
           setIsLoading(false);
-          return false;
+          return;
         }
 
         // Change uploaded status on local db
@@ -361,137 +221,29 @@ const Upload = ({}: UploadProps): JSX.Element => {
         return [...prev, 'Готово'];
       });
       setIsLoading(false);
+      isUploading = true;
+      setIsSynchroRunning(false);
+      // navigate(Routes.Home);
     } catch (error: any) {
       message.error(error?.response?.data?.message || 'Ошибка');
       setUploadLog((prev) => {
-        return [...prev, 'Ошибка, попробуйте заново...'];
+        return [...prev, 'Ошибка синхронизации заказов...'];
       });
       console.log(error);
 
       setIsLoading(false);
+      // navigate(Routes.Home);
     }
   };
 
-  // eslint-disable-next-line consistent-return
-  const onLocalBaseUpdate = async () => {
-    try {
-      setIsLoading(true);
-      // Download tables from server
-      setUploadLog((prev) => {
-        return [
-          ...prev,
-          'Скачиваем список столов с сервера и обновляем локальную БД...',
-        ];
-      });
-      const downloadTables = await downloadTablesCsv();
-      if (downloadTables === false) {
-        setIsLoading(false);
-        return false;
-      }
-      if (downloadTables === false) {
-        setIsLoading(false);
-        setUploadLog((prev) => {
-          return [...prev, 'Ошибка, попробуйте заново...'];
-        });
-        return false;
-      }
-
-      // Download categories from server
-      setUploadLog((prev) => {
-        return [
-          ...prev,
-          'Скачиваем список категорий с сервера и обновляем локальную БД...',
-        ];
-      });
-      const downloadCategories = await downloadCategoriesCsv();
-
-      if (downloadCategories === false) {
-        setIsLoading(false);
-        return false;
-      }
-
-      // Download products from server
-      setUploadLog((prev) => {
-        return [
-          ...prev,
-          'Скачиваем товары с сервера и обновляем локальную БД...',
-        ];
-      });
-      const downloadProducts = await downloadProductsCsv();
-
-      if (downloadProducts === false) {
-        setIsLoading(false);
-        return false;
-      }
-
-      // Download clients from server
-      setUploadLog((prev) => {
-        return [
-          ...prev,
-          'Скачиваем список клиентов с сервера и обновляем локальную БД...',
-        ];
-      });
-      const downloadClients = await downloadClientsCsv();
-
-      if (downloadClients === false) {
-        setIsLoading(false);
-        return false;
-      }
-
-      // Download discounts from server
-      setUploadLog((prev) => {
-        return [
-          ...prev,
-          'Скачиваем список скидок с сервера и обновляем локальную БД...',
-        ];
-      });
-      const downloadDiscounts = await downloadDiscountsCsv();
-
-      if (downloadDiscounts === false) {
-        setIsLoading(false);
-        return false;
-      }
-
-      // Download users from server
-      setUploadLog((prev) => {
-        return [
-          ...prev,
-          'Скачиваем список пользователей с сервера и обновляем локальную БД...',
-        ];
-      });
-      const downloadedUsers = await downloadUsers();
-
-      if (downloadedUsers === false) {
-        setIsLoading(false);
-        return false;
-      }
-
-      // End message
-      setUploadLog((prev) => {
-        return [...prev, 'Готово'];
-      });
-      setIsLoading(false);
-    } catch (error: any) {
-      message.error(error?.response?.data?.message || 'Ошибка');
-      setUploadLog((prev) => {
-        return [...prev, 'Ошибка, попробуйте заново...'];
-      });
-      console.log(error);
-
-      setIsLoading(false);
-    }
-  };
-
-  const logout = () => {
-    window.localStorage.removeItem('tokens');
-
-    dispatch(
-      setTokens({
-        access_token: '',
-        token_type: '',
-      }),
-    );
-  };
+  // const logout = () => {
+  //   dispatch(
+  //     setTokens({
+  //       access_token: '',
+  //       token_type: '',
+  //     }),
+  //   );
+  // };
 
   // if (!tokens.token) {
   //   return (
@@ -577,11 +329,6 @@ const Upload = ({}: UploadProps): JSX.Element => {
   //   );
   // }
 
-  if (tokens.access_token === '' || !tokens.access_token) {
-    console.log('asd', tokens);
-    return <SignIn />;
-  }
-
   return (
     <Flex
       vertical
@@ -593,29 +340,13 @@ const Upload = ({}: UploadProps): JSX.Element => {
       }}
     >
       <Typography.Title level={3}>
-        Загрузка продуктов и обновление заказов
+        Синхронизация заказов на сервере
       </Typography.Title>
       <Typography.Text>
         Обновление может занимать больше 10 минут, в зависимости от количества
         товаров и заказов на сервере. Не закрывайте программу и не выключайте
         компьютер
       </Typography.Text>
-      <Button
-        size="large"
-        type="primary"
-        loading={isLoading}
-        onClick={onOrdersUpload}
-      >
-        Отправить заказы на сервер
-      </Button>
-      <Button
-        size="large"
-        type="primary"
-        loading={isLoading}
-        onClick={onLocalBaseUpdate}
-      >
-        Обновить локальную базу данных
-      </Button>
 
       {uploadLog.length !== 0 && (
         <div
@@ -655,29 +386,8 @@ const Upload = ({}: UploadProps): JSX.Element => {
           ))}
         </div>
       )}
-
-      <Flex
-        style={{
-          width: '100%',
-          marginTop: 'auto',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <Button
-          size="large"
-          loading={isLoading}
-          onClick={() => navigate(Routes.Home)}
-        >
-          Вернуться
-        </Button>
-
-        <Button size="large" danger loading={isLoading} onClick={logout}>
-          Выйти
-        </Button>
-      </Flex>
     </Flex>
   );
 };
 
-export default Upload;
+export default Synchro;

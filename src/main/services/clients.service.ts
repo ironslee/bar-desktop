@@ -58,44 +58,31 @@ export const updateOpenOrderClient = (
   db.close();
 };
 
-export const importClients = async (token: string) => {
+export const importClients = async () => {
   try {
-    const response = await axios.post(
-      `${apiUrl}/desktop/clients`,
-      {},
-      {
-        responseType: 'blob',
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      },
-    );
-    const filePath =
-      process?.env?.NODE_ENV === 'development'
-        ? app.getAppPath() + '/clients.csv'
-        : path.join(process.resourcesPath, '/clients.csv');
-    fs.writeFileSync(filePath, response.data);
+    const response = await axios.get(`${apiUrl}/desktop/clients`);
 
-    const result: any[] = [];
+    if (!Array.isArray(response.data)) {
+      throw new Error('Ответ сервера не содержит массив объектов');
+    }
 
-    await fs
-      .createReadStream(filePath)
-      .pipe(
-        csv({
-          separator: ',',
-          mapHeaders: ({ header }) => {
-            return String(header).trim();
-          },
-        }),
-      )
-      .on('data', (data) => result.push(data))
-      .on('end', () => {
-        updateClients(result);
-      });
+    const clients = await response.data.map((client: ClientItem) => ({
+      id: client.id,
+      name: client.name,
+      number: client.number,
+    }));
 
+    // db tables update
+    const success = await updateClients(clients);
+
+    if (!success) {
+      throw new Error('Ошибка обновления таблиц в базе данных');
+    }
+
+    console.log('Таблицы успешно импортированы и обновлены.');
     return true;
   } catch (error) {
-    console.log(error);
+    console.error('Ошибка импорта таблиц:', error);
     return false;
   }
 };
@@ -103,6 +90,9 @@ export const importClients = async (token: string) => {
 const updateClients = (clients: ClientItem[]) => {
   try {
     const db = connect();
+
+    // Foreign key verification off
+    db.prepare('PRAGMA foreign_keys = OFF;').run();
 
     // Clear clients table
     const clearClients = db.prepare(
@@ -126,6 +116,9 @@ const updateClients = (clients: ClientItem[]) => {
     });
 
     insertMany(clients);
+
+    // Foreign key verification on
+    db.prepare('PRAGMA foreign_keys = ON;').run();
 
     db.close();
 

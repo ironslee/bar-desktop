@@ -43,7 +43,7 @@ const SigninForm = ({}: SigninFormProps): JSX.Element => {
   // const [getUser] = useGetUserByTokenMutation();
 
   useEffect(() => {
-    if (tokens.token) {
+    if (tokens.access_token) {
       // eslint-disable-next-line no-use-before-define
       getAccountInfo();
     }
@@ -179,9 +179,8 @@ const SigninForm = ({}: SigninFormProps): JSX.Element => {
   const logout = () => {
     dispatch(
       setTokens({
-        token: '',
-        refreshToken: '',
-        tokenType: '',
+        access_token: '',
+        token_type: '',
       }),
     );
   };

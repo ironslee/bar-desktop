@@ -1,13 +1,16 @@
 export interface UserItem {
   id: number;
-  name: string;
-  number: string;
+  username: string;
+  email: string;
+  phone_number: string;
+  full_name: string;
 }
 
 export interface Tokens {
-  token: string;
-  refreshToken: string;
-  tokenType: string | null;
+  access_token: string;
+  // refreshToken: string;
+  token_type: string;
+  // token_type: string | null;
 }
 
 export interface User {

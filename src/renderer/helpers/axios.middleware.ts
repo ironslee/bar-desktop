@@ -7,10 +7,10 @@ api.interceptors.request.use((config: any) => {
   const tokens = window.localStorage.getItem('tokens');
   const tokensParse = tokens ? JSON.parse(tokens) : '';
 
-  const { token } = tokensParse;
+  const { access_token } = tokensParse;
 
-  if (token) {
-    config.headers.authorization = `Bearer ${token}`;
+  if (access_token) {
+    config.headers.authorization = `Bearer ${access_token}`;
   }
 
   config.url = new URL(config.url, apiUrl).toString();
