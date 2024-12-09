@@ -10,9 +10,8 @@ interface UploadState {
 // Define the initial state using that type
 const initialState: UploadState = {
   tokens: {
-    token: '',
-    refreshToken: '',
-    tokenType: '',
+    access_token: '',
+    token_type: '',
   },
 };
 

@@ -6,6 +6,7 @@ import { app } from 'electron';
 import path from 'path';
 import fs from 'fs';
 import csv from 'csv-parser';
+import { message } from 'antd';
 
 export const getTables = () => {
   const db = connect();
@@ -24,44 +25,31 @@ export const getTables = () => {
   return tables as TableItem[];
 };
 
-export const importTables = async (token: string) => {
+export const importTables = async () => {
   try {
-    const response = await axios.post(
-      `${apiUrl}/desktop/tables`,
-      {},
-      {
-        responseType: 'blob',
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      },
-    );
-    const filePath =
-      process?.env?.NODE_ENV === 'development'
-        ? app.getAppPath() + '/tables.csv'
-        : path.join(process.resourcesPath, '/tables.csv');
-    fs.writeFileSync(filePath, response.data);
+    const response = await axios.get(`${apiUrl}/desktop/tables`);
 
-    const result: any[] = [];
+    if (!Array.isArray(response.data)) {
+      throw new Error('Ответ сервера не содержит массив объектов');
+    }
 
-    await fs
-      .createReadStream(filePath)
-      .pipe(
-        csv({
-          separator: ',',
-          mapHeaders: ({ header }) => {
-            return String(header).trim();
-          },
-        }),
-      )
-      .on('data', (data) => result.push(data))
-      .on('end', () => {
-        updateTables(result);
-      });
+    const tables = await response.data.map((table: TableItem) => ({
+      id: table.id,
+      name: table.name,
+      color: table.color,
+    }));
 
+    // db tables update
+    const success = await updateTables(tables);
+
+    if (!success) {
+      throw new Error('Ошибка обновления таблиц в базе данных');
+    }
+
+    console.log('Таблицы успешно импортированы и обновлены.');
     return true;
   } catch (error) {
-    console.log(error);
+    console.error('Ошибка импорта таблиц:', error);
     return false;
   }
 };
@@ -69,6 +57,9 @@ export const importTables = async (token: string) => {
 const updateTables = (tables: TableItem[]) => {
   try {
     const db = connect();
+
+    // Foreign key verification off
+    db.prepare('PRAGMA foreign_keys = OFF;').run();
 
     // Clear tables table
     const clearTables = db.prepare(
@@ -92,6 +83,9 @@ const updateTables = (tables: TableItem[]) => {
     });
 
     insertMany(tables);
+
+    // Foreign key verification on
+    db.prepare('PRAGMA foreign_keys = ON;').run();
 
     db.close();
 

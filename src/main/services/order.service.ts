@@ -193,7 +193,7 @@ export const closeOrder = (data: SaveOrderData) => {
   `);
   const order = getOrderQuery.get(existingOrder.id) as OrderToUpload;
   const getOrderItemsQuery = db.prepare(`
-    SELECT * FROM orders_items WHERE order_id = ?;
+    SELECT id, product_id, quantity, price FROM orders_items WHERE order_id = ?;
   `);
   const orderItems = getOrderItemsQuery.all(existingOrder.id);
 
@@ -218,7 +218,7 @@ export const getOrdersToUpload = () => {
 
   const getProductsByOrderId = db.prepare(
     `
-      SELECT *
+      SELECT id, product_id, quantity, price
       FROM orders_items
       WHERE order_id = ?;
     `,

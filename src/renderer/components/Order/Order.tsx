@@ -134,7 +134,7 @@ const Order = (): JSX.Element => {
       setPreCheck({
         checkId: tableOrder.checkNumber,
         table: selectedTable.name,
-        user: tableOrder.orderUser?.name || '',
+        user: tableOrder.orderUser?.username || '',
         client: tableOrder.orderClient?.name || '',
         total_amount: totalAmount,
         discount: selectedDiscount?.discount_value ?? 0,

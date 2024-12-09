@@ -64,7 +64,7 @@ const Users = ({ onChangeModal, isUsersOpen }: UsersProps): JSX.Element => {
         // style={{ maxWidth: 150 }}
         className={selectedUser ? 'button_small' : 'button_large'}
       >
-        {selectedUser ? selectedUser.name : 'Выберите официанта'}
+        {selectedUser ? selectedUser.username : 'Выберите официанта'}
       </Button>
       <Modal open={isUsersOpen} footer={[]} onCancel={onChangeModal}>
         <Typography.Title level={3}>Выберите пользователя</Typography.Title>
@@ -91,7 +91,7 @@ const Users = ({ onChangeModal, isUsersOpen }: UsersProps): JSX.Element => {
                   fontWeight: selectedUser?.id === user.id ? '600' : '400',
                 }}
               >
-                {user.name}
+                {user.username}
               </Card>
             </Col>
           ))}

@@ -44,12 +44,14 @@ import {
   TABLES_IMPORT,
   USERS_GET,
   USERS_GET_BY_ID,
+  USERS_IMPORT,
   USERS_UPDATE_OPEN_ORDER,
 } from './services/main-constants';
 import { openRoute } from './services/route.service';
 import {
   getUserById,
   getUsers,
+  importUsers,
   updateOpenOrderUser,
 } from './services/users.service';
 import {
@@ -201,8 +203,8 @@ app
     ipcMain.handle(TABLES_GET, async () => {
       return getTables();
     });
-    ipcMain.handle(TABLES_IMPORT, async (_, token: string) => {
-      return importTables(token);
+    ipcMain.handle(TABLES_IMPORT, async (_) => {
+      return importTables();
     });
 
     // Users
@@ -218,6 +220,9 @@ app
         return updateOpenOrderUser(userId, orderNumber);
       },
     );
+    ipcMain.handle(USERS_IMPORT, async (_) => {
+      return importUsers();
+    });
 
     // Menu
     ipcMain.handle(MENU_GET_CATEGORIES, async () => {
@@ -235,11 +240,11 @@ app
     ipcMain.handle(MENU_GET_PRODUCT_BY_ID, async (_, id: number) => {
       return getProductById(id);
     });
-    ipcMain.handle(MENU_IMPORT_CATEGORIES, async (_, token: string) => {
-      return importCategories(token);
+    ipcMain.handle(MENU_IMPORT_CATEGORIES, async (_) => {
+      return importCategories();
     });
-    ipcMain.handle(MENU_IMPORT_PRODUCTS, async (_, token: string) => {
-      return importProducts(token);
+    ipcMain.handle(MENU_IMPORT_PRODUCTS, async (_) => {
+      return importProducts();
     });
 
     // Clients
@@ -255,8 +260,8 @@ app
         return updateOpenOrderClient(clientId, orderNumber);
       },
     );
-    ipcMain.handle(CLIENTS_IMPORT, async (_, token: string) => {
-      return importClients(token);
+    ipcMain.handle(CLIENTS_IMPORT, async (_) => {
+      return importClients();
     });
 
     // Discount
@@ -275,8 +280,8 @@ app
         return updateOpenOrderDiscount(discountId, orderNumber);
       },
     );
-    ipcMain.handle(DISCOUNT_IMPORT, async (_, token: string) => {
-      return importDiscount(token);
+    ipcMain.handle(DISCOUNT_IMPORT, async (_) => {
+      return importDiscount();
     });
 
     //Order methods

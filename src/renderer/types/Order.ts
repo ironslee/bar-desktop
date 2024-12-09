@@ -43,6 +43,13 @@ export interface OrderItemsDbItem {
   order_id: number;
 }
 
+export interface OrderItemExportItem {
+  id: number;
+  product_id: number;
+  quantity: number;
+  price: number;
+}
+
 export interface OrderItemData {
   product_id: number; // ID продукта
   quantity: number; // Количество товара
@@ -66,6 +73,7 @@ export interface SaveOrderData {
 export interface OrderToUpload extends SaveOrderData {
   id: number;
   number: number;
+  items: OrderItemsDbItem[];
 }
 
 export interface CloseOrderData extends SaveOrderData {

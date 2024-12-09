@@ -84,44 +84,30 @@ export const updateOpenOrderDiscount = (
   db.close();
 };
 
-export const importDiscount = async (token: string) => {
+export const importDiscount = async () => {
   try {
-    const response = await axios.post(
-      `${apiUrl}/desktop/discounts`,
-      {},
-      {
-        responseType: 'blob',
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      },
-    );
-    const filePath =
-      process?.env?.NODE_ENV === 'development'
-        ? app.getAppPath() + '/discount.csv'
-        : path.join(process.resourcesPath, '/discount.csv');
-    fs.writeFileSync(filePath, response.data);
+    const response = await axios.get(`${apiUrl}/desktop/discounts`);
 
-    const result: any[] = [];
+    if (!Array.isArray(response.data)) {
+      throw new Error('Ответ сервера не содержит массив объектов');
+    }
 
-    await fs
-      .createReadStream(filePath)
-      .pipe(
-        csv({
-          separator: ',',
-          mapHeaders: ({ header }) => {
-            return String(header).trim();
-          },
-        }),
-      )
-      .on('data', (data) => result.push(data))
-      .on('end', () => {
-        updateDiscount(result);
-      });
+    const discounts = await response.data.map((discount: DiscountItem) => ({
+      id: discount.id,
+      discount_value: discount.discount_value,
+    }));
 
+    // db tables update
+    const success = await updateDiscount(discounts);
+
+    if (!success) {
+      throw new Error('Ошибка обновления таблиц в базе данных');
+    }
+
+    console.log('Таблицы успешно импортированы и обновлены.');
     return true;
   } catch (error) {
-    console.log(error);
+    console.error('Ошибка импорта таблиц:', error);
     return false;
   }
 };
@@ -129,6 +115,9 @@ export const importDiscount = async (token: string) => {
 const updateDiscount = (discount: DiscountItem[]) => {
   try {
     const db = connect();
+
+    // Foreign key verification off
+    db.prepare('PRAGMA foreign_keys = OFF;').run();
 
     // Clear discount table
     const clearDiscount = db.prepare(
@@ -152,6 +141,9 @@ const updateDiscount = (discount: DiscountItem[]) => {
     });
 
     insertMany(discount);
+
+    // Foreign key verification on
+    db.prepare('PRAGMA foreign_keys = ON;').run();
 
     db.close();
 

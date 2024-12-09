@@ -76,17 +76,22 @@ const Payment = ({
     setPaymentMethod(e.target.value);
   };
 
-  // const isInternetAvailable = async (url: string = `${apiUrl}`) => {
-  //   try {
-  //     const response = await axios.get(url, { timeout: 5000 }); // Таймаут 5 секунд
-  //     console.error(response);
+  // eslint-disable-next-line consistent-return
+  const isInternetAvailable = async (
+    url: string = `http://91.147.93.105:8000/desktop/orders/latest
+`,
+    // eslint-disable-next-line consistent-return
+  ) => {
+    try {
+      const response = await axios.get(url, { timeout: 5000 }); // Таймаут 5 секунд
+      console.error(response);
 
-  //     return response.status === 200; // Проверяем, что сервер вернул статус 200
-  //   } catch (error) {
-  //     console.error('Нет соединения с интернетом:', error.message);
-  //     return false; // Если запрос не прошёл, интернета нет
-  //   }
-  // };
+      if (response.status === 200) return true; // Проверяем, что сервер вернул статус 200
+    } catch (error) {
+      console.error('Нет соединения с интернетом:', error);
+      return false; // Если запрос не прошёл, интернета нет
+    }
+  };
 
   const tableName = useAppSelector((state: RootState) => {
     const table = state.tablesStore.tables.find(
@@ -132,7 +137,7 @@ const Payment = ({
         await window.electron.printCheck({
           checkId: tableOrder?.checkNumber ?? 0,
           table: tableName ?? '',
-          user: tableOrder.orderUser?.name ?? '',
+          user: tableOrder.orderUser?.username ?? '',
           client: tableOrder.orderClient?.name ?? '',
           total_amount: totalAmount,
           discount: tableOrder.orderDiscount?.discount_value ?? 0,
@@ -140,6 +145,21 @@ const Payment = ({
         });
 
         if (response) {
+          const data = [];
+          data.push({
+            id: response.id,
+            number: response.number,
+            created_at: response.created_at,
+            total_amount: response.total_amount,
+            discount_id: response.discount_id,
+            discount_total_amount: response.discount_total_amount,
+            payment_type_id: response.payment_type_id,
+            table_id: response.table_id,
+            client: response.client,
+            created_by: response.created_by,
+            status: response.status,
+            items: response.items,
+          });
           // const data = {
           //   id: response.id,
           //   number: response.number,
@@ -154,13 +174,17 @@ const Payment = ({
           //   status: response.status,
           //   items: response.items,
           // };
-          // if (internet) {
+          console.log('DATA', data);
+          // if (await isInternetAvailable()) {
           //   const res = await api.post(`/desktop/orders`, data);
-          // await window.electron.setUploadedOrderById(response.id);
+          //   await window.electron.setUploadedOrderById(response.id);
+          //   if (res) {
+          //     console.log('imported1');
+          //   }
           // }
           await message.success('Оплата успешно завершена!');
-          onChangeModal(); // Закрываем окно оплаты
-          window.location.href = '/';
+          // onChangeModal(); // Закрываем окно оплаты
+          // window.location.href = '/';
         } else {
           message.error('Заказ не сохранен! Оплата невозможна!');
         }
