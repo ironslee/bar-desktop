@@ -7,6 +7,8 @@ import {
   addItemToOrder,
   removeItemFromOrder,
   deleteItemFromOrder,
+  addItemsFromTableOrder,
+  updatePrintedQuantity,
 } from './Order.slice';
 import { OrderItem, OrderStatus } from '../../types/Order';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
@@ -33,12 +35,17 @@ const Order = (): JSX.Element => {
 
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
 
+  const [savedOrderId, setSavedOrderId] = useState<number | null>(null);
+
   const [discountFromDb, setDiscountFromDb] = useState<DiscountItem | null>(
     null,
   );
 
   const { items, totalAmount } = useAppSelector(
     (state: RootState) => state.orderStore,
+  );
+  const { tableOrders } = useAppSelector(
+    (state: RootState) => state.tablesStore,
   );
   // const { selectedDiscount } = useAppSelector(
   //   (state: RootState) => state.discountStore,
@@ -201,6 +208,13 @@ const Order = (): JSX.Element => {
     }
   };
 
+  const onUpdatePrintedQuantity = (
+    productId: number,
+    printedQuantity: number,
+  ) => {
+    dispatch(updatePrintedQuantity({ productId, printedQuantity }));
+  };
+
   const handlePrintKitchenTicket = async () => {
     if (tableId && tableOrderItems) {
       const itemsToPrint = tableOrderItems
@@ -211,6 +225,7 @@ const Order = (): JSX.Element => {
           product_id: item.product.id,
           price: item.product.retprice,
         }));
+      console.log('items1', items);
 
       dispatch(savePrintedItems({ tableId, printedItems: itemsToPrint }));
       try {
@@ -234,6 +249,7 @@ const Order = (): JSX.Element => {
 
           // Сохраняем заказ в базе данных
           const orderId = await window.electron.saveOrder(newOrder);
+          setSavedOrderId(orderId);
           if (orderUser) {
             dispatch(
               syncTableOrder({
@@ -253,10 +269,17 @@ const Order = (): JSX.Element => {
             items: [],
             table: '',
           }));
+          if (tableOrder) {
+            dispatch(addItemsFromTableOrder(tableOrder.orderItems ?? []));
+          }
+          console.log('items2', items);
         }
       } catch (error) {
         console.log(error);
       }
+      itemsToPrint.forEach((item) => {
+        onUpdatePrintedQuantity(item.product.id, item.quantity);
+      });
     }
   };
 
@@ -290,9 +313,12 @@ const Order = (): JSX.Element => {
                     <Button
                       type="text"
                       onClick={() => handleRemove(item.product.id)}
-                      icon={<MinusOutlined style={{ color: colors.primary }} />}
+                      icon={<MinusOutlined />}
                       style={{ borderRadius: '30px' }}
+                      disabled={item.quantity <= item.printedQuantity}
+                      className="minus-button"
                     />
+
                     <Typography.Text
                       style={{ minWidth: '20px', textAlign: 'center' }}
                     >
@@ -313,10 +339,10 @@ const Order = (): JSX.Element => {
                     type="text"
                     danger
                     onClick={() => handleDelete(item.product.id)}
-                    icon={
-                      <DeleteOutlined style={{ color: 'var(--error-color)' }} />
-                    }
+                    icon={<DeleteOutlined />}
                     style={{ borderRadius: '30px' }}
+                    disabled={item.printedQuantity > 0}
+                    className="delete-button"
                   />
                 </Col>
               </Row>

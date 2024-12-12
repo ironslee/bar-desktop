@@ -183,7 +183,7 @@ const Payment = ({
           //   }
           // }
           await message.success('Оплата успешно завершена!');
-          // onChangeModal(); // Закрываем окно оплаты
+          // onChangeModal();
           // window.location.href = '/';
         } else {
           message.error('Заказ не сохранен! Оплата невозможна!');
