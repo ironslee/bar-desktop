@@ -83,6 +83,20 @@ export const orderSlice = createSlice({
         0,
       );
     },
+
+    updatePrintedQuantity(
+      state,
+      action: PayloadAction<{ productId: number; printedQuantity: number }>,
+    ) {
+      const { productId, printedQuantity } = action.payload;
+      const productItem = state.items.find(
+        (item) => item.product.id === productId,
+      );
+
+      if (productItem) {
+        productItem.printedQuantity = printedQuantity;
+      }
+    },
   },
 });
 
@@ -93,6 +107,7 @@ export const {
   clearOrder,
 
   addItemsFromTableOrder,
+  updatePrintedQuantity,
 } = orderSlice.actions;
 
 export default orderSlice.reducer;

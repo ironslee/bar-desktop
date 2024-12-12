@@ -69,6 +69,11 @@ const Menu = (): JSX.Element => {
       )
     : products;
 
+  const handleBackToCategories = () => {
+    dispatch(selectCategory(null));
+    dispatch(setProducts([]));
+  };
+
   return (
     <Flex vertical className="menu_wrap">
       <Input
@@ -103,7 +108,7 @@ const Menu = (): JSX.Element => {
       /> */}
 
       {/* КЛАССИКА */}
-      <Row gutter={[5, 5]} className="categories_wrap">
+      {/* <Row gutter={[5, 5]} className="categories_wrap">
         {categories.map((category) => (
           <Col key={category.id} span={6}>
             <Button
@@ -119,7 +124,7 @@ const Menu = (): JSX.Element => {
             </Button>
           </Col>
         ))}
-      </Row>
+      </Row> */}
 
       {/* СЛАЙДЕР */}
       {/* <Carousel
@@ -147,19 +152,27 @@ const Menu = (): JSX.Element => {
       </Carousel> */}
 
       {/* ХЛЕБНЫЕ КРОШКИ */}
-      {/* <Breadcrumb className="breadcrumb_item" separator=">">
-        <Breadcrumb.Item onClick={() => dispatch(selectCategory(null))}>
-          <Button className="breadcrumb_link" type="link">
-            Все категории
-          </Button>
-        </Breadcrumb.Item>
-        <Breadcrumb.Item>
-          <Button type="link" className="breadcrumb_link">
-            {' '}
-            {selectedCategory ? selectedCategory.name : ''}
-          </Button>
-        </Breadcrumb.Item>
-      </Breadcrumb>
+      {selectedCategory && (
+        <Breadcrumb className="breadcrumb_item categories_wrap" separator=" > ">
+          <>
+            <Breadcrumb.Item
+              // onClick={() => dispatch(selectCategory(null))}
+              onClick={() => handleBackToCategories()}
+            >
+              <Button className="breadcrumb_link" type="default">
+                Все категории
+              </Button>
+            </Breadcrumb.Item>
+            <Breadcrumb.Item>
+              <Button type="primary" className="breadcrumb_link">
+                {' '}
+                {selectedCategory ? selectedCategory.name : ''}
+              </Button>
+            </Breadcrumb.Item>
+          </>
+        </Breadcrumb>
+      )}
+
       {!selectedCategory && (
         <Row gutter={[5, 5]} className="categories_wrap">
           {categories.map((category) => (
@@ -174,7 +187,7 @@ const Menu = (): JSX.Element => {
           ))}
         </Row>
       )}
-      {selectedCategory && (
+      {/* {selectedCategory && (
         <Row gutter={[5, 5]}>
           {filteredProducts.map((product) => (
             <Col key={product.id} span={6}>

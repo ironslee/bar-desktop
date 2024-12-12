@@ -4,6 +4,7 @@ import orderReducer, {
   deleteItemFromOrder,
   clearOrder,
   addItemsFromTableOrder,
+  updatePrintedQuantity,
 } from './Order.slice';
 import Order from './Order';
 
@@ -15,4 +16,5 @@ export {
   deleteItemFromOrder,
   clearOrder,
   addItemsFromTableOrder,
+  updatePrintedQuantity,
 };

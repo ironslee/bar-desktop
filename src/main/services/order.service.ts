@@ -209,7 +209,7 @@ export const getOrdersToUpload = () => {
     `
       SELECT *
       FROM orders
-      WHERE uploaded = FALSE
+      WHERE uploaded = FALSE AND status = 'closed'
       ORDER BY id;
     `,
   );

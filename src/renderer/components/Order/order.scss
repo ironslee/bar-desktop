@@ -13,3 +13,23 @@
   flex-direction: column;
   justify-content: start;
 }
+
+.minus-button {
+  color: #16c787;
+}
+
+.minus-button:disabled {
+  color: grey !important;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.delete-button {
+  color: var(--error-color);
+}
+
+.delete-button:disabled {
+  color: grey !important;
+  cursor: not-allowed;
+  opacity: 0.5;
+}
