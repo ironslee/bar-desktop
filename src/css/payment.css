@@ -1,0 +1,22 @@
+.tableStyle {
+  font-size: 12px;
+  border-collapse: collapse;
+  width: 100%;
+  table-layout: auto;
+}
+
+.cellStyle {
+  padding: 0px 2px;
+  border: 1px solid black;
+  text-align: left;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.radio_button {
+  width: 100px;
+  text-align: center;
+  font-size: 14px;
+  padding: 0;
+}/*# sourceMappingURL=payment.css.map */

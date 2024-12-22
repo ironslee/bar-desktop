@@ -12,6 +12,14 @@ export const MENU_GET_ALL_PRODUCTS = 'menu:getAllProducts';
 export const MENU_GET_PRODUCT_BY_ID = 'menu:getProductById';
 export const MENU_IMPORT_CATEGORIES = 'menu:importCategories';
 export const MENU_IMPORT_PRODUCTS = 'menu:importProducts';
+export const MENU_ADD_PRODUCT_TO_CURRENT_COUNT =
+  'menu:addProductToCurrentCount';
+export const MENU_UPDATE_ORDER_ID_IN_CURRENT_COUNT =
+  'menu:updateOrderIdInCurrentCount';
+export const MENU_RECALCULATE_STOCK = 'menu:recalculateStock';
+export const MENU_CLOSE_ORDER_IN_CURRENT_COUNT =
+  'menu:closeOrderInCurrentCount';
+export const MENU_GET_CURRENT_COUNTS = 'menu:getCurrentCounts';
 
 export const CLIENTS_GET = 'clients:get';
 export const CLIENTS_GET_BY_ID = 'clients:getById';

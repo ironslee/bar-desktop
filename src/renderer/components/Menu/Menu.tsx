@@ -12,13 +12,15 @@ import {
   Breadcrumb,
 } from 'antd';
 import { CloseCircleOutlined, CloseOutlined } from '@ant-design/icons';
+import { electron } from 'process';
 import { setCategories, setProducts, selectCategory } from './Menu.slice';
 import { RootState } from '../../app/providers/StoreProvider';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
 import { useAppSelector } from '../../hooks/useAppSelector';
-import { ProductItem } from '../../types/Product';
+import { CurrentCount, ProductItem } from '../../types/Product';
 import { addItemToOrder } from '../Order';
 import useDebounce from '../../hooks/useDebounce';
+import { calculateStockLeft } from '../../utils/calculateStockLeft';
 
 const Menu = (): JSX.Element => {
   const dispatch = useAppDispatch();
@@ -28,7 +30,18 @@ const Menu = (): JSX.Element => {
 
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [allProducts, setAllProducts] = useState<ProductItem[]>([]);
+  const [currentCounts, setCurrentCounts] = useState<CurrentCount[]>([]);
   const debouncedSearchQuery = useDebounce(searchQuery, 1000);
+
+  const tableId = useAppSelector(
+    (state) => state.tablesStore.selectedTable?.id,
+  );
+  const tableOrderItems = useAppSelector((state: RootState) => {
+    const tableOrder = state.tablesStore.tableOrders.find(
+      (order) => order.tableId === tableId,
+    );
+    return tableOrder ? tableOrder.orderItems : [];
+  });
 
   // Запрос категорий при загрузке
   useEffect(() => {
@@ -46,6 +59,30 @@ const Menu = (): JSX.Element => {
     fetchCategories();
   }, [dispatch]);
 
+  useEffect(() => {
+    const fetchCurrentCounts = async () => {
+      try {
+        // Вызов асинхронной функции через IPC
+        const counts = await window.electron.getCurrentCounts();
+        console.log('counts', counts);
+        setCurrentCounts(counts); // Устанавливаем состояние с массивом
+        dispatch(setCurrentCounts(counts));
+      } catch (error) {
+        console.error('Ошибка при получении currentCounts:', error);
+      }
+    };
+
+    fetchCurrentCounts(); // Вызываем функцию
+  }, [tableOrderItems]);
+
+  const adaptProducts = (productsArr: any[]) => {
+    return productsArr.map((product) => ({
+      ...product,
+      stock: product.stock === null ? null : Math.max(0, product.stock),
+      isDisabled: product.stock !== null && product.stock <= 0,
+    }));
+  };
+
   // Запрос продуктов при выборе категории
   const handleSelectCategory = async (categoryId: number) => {
     try {
@@ -59,8 +96,29 @@ const Menu = (): JSX.Element => {
   };
 
   // Добавление продукта в заказ при клике
-  const handleProductClick = (product: ProductItem) => {
-    dispatch(addItemToOrder(product));
+  const handleProductClick = async (product: ProductItem) => {
+    // if (product.stock !== null && product.stock > 0) {
+    //   product.stock -= 1;
+    //   if (product.stock === 0) {
+    //     product.isDisabled = true;
+    //   }
+    // }
+
+    if (product.stock !== null && tableId) {
+      const success = window.electron.addProductToCurrentCount(
+        product.id,
+        tableId,
+      );
+      if (await success) {
+        dispatch(addItemToOrder(product));
+      } else {
+        message.error('Ошибка добавления продукта в заказ.');
+      }
+    } else {
+      dispatch(addItemToOrder(product));
+    }
+
+    // dispatch(addItemToOrder(product));
   };
 
   const filteredProducts = debouncedSearchQuery
@@ -219,6 +277,56 @@ const Menu = (): JSX.Element => {
       )} */}
 
       <Row gutter={[5, 5]} style={{ marginTop: '16px' }}>
+        {filteredProducts.map((product) => {
+          const stockLeft = calculateStockLeft(product, currentCounts);
+          console.log('stockLeft', stockLeft);
+          return (
+            <Col key={product.id} span={6}>
+              <Button
+                disabled={
+                  (product.stock !== null && product.stock <= 0) ||
+                  product.stock - stockLeft === product.stock
+                }
+                type="default"
+                className="menu_item_card_wrap"
+                onClick={() => handleProductClick(product)}
+              >
+                <Card
+                  className={`menu_item_card ${(product.stock !== null && product.stock <= 0) || product.stock - stockLeft === product.stock ? 'disabled' : ''}`}
+                  title={
+                    <span
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        whiteSpace: 'normal',
+                      }}
+                    >
+                      {product.name}
+                    </span>
+                  }
+                  cover={
+                    product.link ? (
+                      <img alt={product.name} src={product.link} />
+                    ) : null
+                  }
+                >
+                  {`Цена: ${product.retprice} тенге`}
+                  {product.stock !== null && (
+                    // <div>{`Остаток: ${product.stock}`}</div>
+                    <div>
+                      {' '}
+                      {stockLeft !== null && stockLeft > 0
+                        ? `Остаток: ${stockLeft}`
+                        : ''}
+                    </div>
+                  )}
+                </Card>
+              </Button>
+            </Col>
+          );
+        })}
+      </Row>
+      {/* <Row gutter={[5, 5]} style={{ marginTop: '16px' }}>
         {filteredProducts.map((product) => (
           <Col key={product.id} span={6}>
             <Card
@@ -245,7 +353,7 @@ const Menu = (): JSX.Element => {
             </Card>
           </Col>
         ))}
-      </Row>
+      </Row> */}
     </Flex>
   );
 };

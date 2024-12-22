@@ -1,0 +1,23 @@
+@import 'antd/dist/reset.css';
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-track {
+  display: none;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(145, 158, 171, 0.48);
+  border-radius: 12px;
+}
+
+.order_title {
+  display: inline-block;
+  border: 1px solid #D3D3D3;
+  border-radius: 10px;
+  padding: 4px 8px;
+}/*# sourceMappingURL=index.css.map */
