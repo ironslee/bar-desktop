@@ -1,0 +1,9 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding: 32px;
+  background: var(--white-color);
+  border-radius: var(--border-radius);
+}/*# sourceMappingURL=SignIn.module.css.map */

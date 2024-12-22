@@ -1,6 +1,15 @@
 import './order.scss';
 import React, { useEffect, useState } from 'react';
-import { Button, Row, Col, Card, Typography, Flex, Divider } from 'antd';
+import {
+  Button,
+  Row,
+  Col,
+  Card,
+  Typography,
+  Flex,
+  Divider,
+  message,
+} from 'antd';
 import { DeleteOutlined, MinusOutlined, PlusOutlined } from '@ant-design/icons';
 import { RootState } from '../../app/providers/StoreProvider';
 import {
@@ -9,6 +18,7 @@ import {
   deleteItemFromOrder,
   addItemsFromTableOrder,
   updatePrintedQuantity,
+  setOrderId,
 } from './Order.slice';
 import { OrderItem, OrderStatus } from '../../types/Order';
 import { useAppDispatch } from '../../hooks/useAppDispatch';
@@ -24,6 +34,8 @@ import {
   selectDiscount,
   selectDiscountFromDb,
 } from '../Discount/Discount.slice';
+import { calculateStockLeft } from '../../utils/calculateStockLeft';
+import { CurrentCount } from '../../types/Product';
 
 const { Title } = Typography;
 
@@ -37,6 +49,8 @@ const Order = (): JSX.Element => {
 
   const [savedOrderId, setSavedOrderId] = useState<number | null>(null);
 
+  const [currentCounts, setCurrentCounts] = useState<CurrentCount[]>([]);
+
   const [discountFromDb, setDiscountFromDb] = useState<DiscountItem | null>(
     null,
   );
@@ -44,6 +58,7 @@ const Order = (): JSX.Element => {
   const { items, totalAmount } = useAppSelector(
     (state: RootState) => state.orderStore,
   );
+  const orderIdFromStore = useAppSelector((state) => state.orderStore.orderId);
   const { tableOrders } = useAppSelector(
     (state: RootState) => state.tablesStore,
   );
@@ -83,6 +98,9 @@ const Order = (): JSX.Element => {
   const categories = useAppSelector(
     (state: RootState) => state.menuStore.categories,
   );
+  // const currentCounts = useAppSelector(
+  //   (state: RootState) => state.menuStore.currentCounts,
+  // );
 
   const [isDiscountOpen, setIsDiscountOpen] = useState(false);
   const onChangeDiscountModal = () => {
@@ -97,6 +115,7 @@ const Order = (): JSX.Element => {
     if (tableId && orderUser) {
       dispatch(
         syncTableOrder({
+          orderId: orderIdFromStore ?? undefined,
           tableId,
           orderItems,
           orderClient: orderClient || null,
@@ -174,12 +193,41 @@ const Order = (): JSX.Element => {
     }
   }, [items, tableOrderItems]);
 
-  const handleAdd = (productId: number) => {
+  useEffect(() => {
+    const fetchCurrentCounts = async () => {
+      try {
+        // Вызов асинхронной функции через IPC
+        const counts = await window.electron.getCurrentCounts();
+        console.log('counts', counts);
+        setCurrentCounts(counts); // Устанавливаем состояние с массивом
+        // dispatch(setCurrentCounts(counts));
+      } catch (error) {
+        console.error('Ошибка при получении currentCounts:', error);
+      }
+    };
+
+    fetchCurrentCounts(); // Вызываем функцию
+  }, [tableOrderItems]);
+
+  const handleAdd = async (productId: number) => {
     const product = items.find(
       (item: OrderItem) => item.product.id === productId,
     )?.product;
     if (product) {
-      dispatch(addItemToOrder(product));
+      if (product.stock !== null && tableId) {
+        const success = window.electron.addProductToCurrentCount(
+          product.id,
+          tableId,
+        );
+        if (await success) {
+          dispatch(addItemToOrder(product));
+        } else {
+          message.error('Ошибка добавления продукта в заказ.');
+        }
+      } else {
+        dispatch(addItemToOrder(product));
+      }
+      // dispatch(addItemToOrder(product));
     }
   };
 
@@ -249,10 +297,26 @@ const Order = (): JSX.Element => {
 
           // Сохраняем заказ в базе данных
           const orderId = await window.electron.saveOrder(newOrder);
+
           setSavedOrderId(orderId);
+          dispatch(setOrderId(orderId));
+
+          // Сохранение orderId в current_count
+          itemsToPrint.map(async (product) => {
+            if (product.product.stock !== null) {
+              await window.electron.updateOrderIdInCurrentCount(
+                tableId,
+                orderId,
+              );
+              console.log('stock', product, orderId);
+            }
+            console.log('countMapping finished');
+          });
+
           if (orderUser) {
             dispatch(
               syncTableOrder({
+                orderId,
                 tableId,
                 orderItems,
                 orderClient: orderClient || null,
@@ -287,67 +351,77 @@ const Order = (): JSX.Element => {
     <>
       <Card style={{ padding: '0px', alignItems: 'start' }}>
         <Row className="order_row items_row">
-          {items.map((item: OrderItem) => (
-            <Flex
-              key={item.product.id}
-              style={{
-                marginBottom: '4px',
-                border: '1px solid #D3D3D3',
-                borderRadius: '10px',
-                padding: '8px 8px',
-                width: '100%',
-                height: '100%',
-              }}
-            >
-              <Row
-                justify="space-between"
-                align="middle"
-                gutter={10}
-                style={{ width: '96%', lineHeight: '1.3' }}
+          {items.map((item: OrderItem) => {
+            const stockLeft = calculateStockLeft(item.product, currentCounts);
+            console.log('orderStockLeft', stockLeft);
+            return (
+              <Flex
+                key={item.product.id}
+                style={{
+                  marginBottom: '4px',
+                  border: '1px solid #D3D3D3',
+                  borderRadius: '10px',
+                  padding: '8px 8px',
+                  width: '100%',
+                  height: '100%',
+                }}
               >
-                <Col span={8} style={{ fontSize: '14px' }}>
-                  {item.product.name}
-                </Col>
-                <Col span={6}>
-                  <Flex align="center" justify="center">
-                    <Button
-                      type="text"
-                      onClick={() => handleRemove(item.product.id)}
-                      icon={<MinusOutlined />}
-                      style={{ borderRadius: '30px' }}
-                      disabled={item.quantity <= item.printedQuantity}
-                      className="minus-button"
-                    />
+                <Row
+                  justify="space-between"
+                  align="middle"
+                  gutter={10}
+                  style={{ width: '96%', lineHeight: '1.3' }}
+                >
+                  <Col span={8} style={{ fontSize: '14px' }}>
+                    {item.product.name}
+                  </Col>
+                  <Col span={6}>
+                    <Flex align="center" justify="center">
+                      <Button
+                        type="text"
+                        onClick={() => handleRemove(item.product.id)}
+                        icon={<MinusOutlined />}
+                        style={{ borderRadius: '30px' }}
+                        disabled={item.quantity <= item.printedQuantity}
+                        className="minus-button"
+                      />
 
-                    <Typography.Text
-                      style={{ minWidth: '20px', textAlign: 'center' }}
-                    >
-                      {item.quantity}
-                    </Typography.Text>
+                      <Typography.Text
+                        style={{ minWidth: '20px', textAlign: 'center' }}
+                      >
+                        {item.quantity}
+                      </Typography.Text>
+                      <Button
+                        type="text"
+                        onClick={() => handleAdd(item.product.id)}
+                        icon={
+                          <PlusOutlined style={{ color: colors.primary }} />
+                        }
+                        style={{ borderRadius: '30px' }}
+                        disabled={
+                          item.product.stock - stockLeft === item.product.stock
+                        }
+                        className="plus-button"
+                      />
+                    </Flex>
+                  </Col>
+                  <Col span={4}>{item.product.retprice}</Col>
+                  <Col span={4}>{item.totalPrice}</Col>
+                  <Col span={1}>
                     <Button
                       type="text"
-                      onClick={() => handleAdd(item.product.id)}
-                      icon={<PlusOutlined style={{ color: colors.primary }} />}
+                      danger
+                      onClick={() => handleDelete(item.product.id)}
+                      icon={<DeleteOutlined />}
                       style={{ borderRadius: '30px' }}
+                      disabled={item.printedQuantity > 0}
+                      className="delete-button"
                     />
-                  </Flex>
-                </Col>
-                <Col span={4}>{item.product.retprice}</Col>
-                <Col span={4}>{item.totalPrice}</Col>
-                <Col span={1}>
-                  <Button
-                    type="text"
-                    danger
-                    onClick={() => handleDelete(item.product.id)}
-                    icon={<DeleteOutlined />}
-                    style={{ borderRadius: '30px' }}
-                    disabled={item.printedQuantity > 0}
-                    className="delete-button"
-                  />
-                </Col>
-              </Row>
-            </Flex>
-          ))}
+                  </Col>
+                </Row>
+              </Flex>
+            );
+          })}
         </Row>
         <Divider />
         <Row className="order_row">

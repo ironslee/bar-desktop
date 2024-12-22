@@ -10,6 +10,7 @@ import { DiscountItem } from '../../types/Discount';
 // }
 
 export interface TableOrder {
+  orderId?: number;
   tableId: number;
   checkNumber?: number;
   orderItems?: OrderItem[];
@@ -63,6 +64,7 @@ export const tablesSlice = createSlice({
     syncTableOrder(
       state,
       action: PayloadAction<{
+        orderId?: number;
         tableId: number;
         orderItems: OrderItem[];
         orderUser: UserItem;
@@ -72,6 +74,7 @@ export const tablesSlice = createSlice({
       }>,
     ) {
       const {
+        orderId,
         tableId,
         orderItems,
         orderClient,
@@ -87,6 +90,7 @@ export const tablesSlice = createSlice({
 
       if (!tableOrder) {
         tableOrder = {
+          orderId: undefined,
           tableId,
           orderItems: [],
           orderDiscount: null,
@@ -163,6 +167,10 @@ export const tablesSlice = createSlice({
 
         if (checkNumber !== undefined) {
           tableOrder.checkNumber = checkNumber;
+        }
+
+        if (orderId !== undefined) {
+          tableOrder.orderId = orderId;
         }
       }
     },

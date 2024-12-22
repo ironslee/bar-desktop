@@ -63,8 +63,12 @@ const Payment = ({
   const tableOrder = useAppSelector((state: RootState) =>
     state.tablesStore.tableOrders.find((order) => order.tableId === tableId),
   );
-  const { totalAmount } = useAppSelector(
+  const { items, totalAmount } = useAppSelector(
     (state: RootState) => state.orderStore,
+  );
+
+  const orderId = useAppSelector(
+    (state: RootState) => state.orderStore.orderId,
   );
   const discount = tableOrder?.orderDiscount; // Скидка
 
@@ -160,6 +164,20 @@ const Payment = ({
             status: response.status,
             items: response.items,
           });
+
+          if (orderId) {
+            items.map(async (product) => {
+              if (product.product.stock !== null) {
+                await window.electron.closeOrderInCurrentCount(
+                  orderId,
+                  tableOrder.tableId,
+                );
+                console.log('stock', product, orderId);
+              }
+              console.log('countMapping finished');
+            });
+          }
+
           // const data = {
           //   id: response.id,
           //   number: response.number,

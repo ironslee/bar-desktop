@@ -6,17 +6,23 @@ import { RootState } from '../../app/providers/StoreProvider';
 interface OrderState {
   items: OrderItem[];
   totalAmount: number;
+  orderId: number | null;
 }
 
 const initialState: OrderState = {
   items: [],
   totalAmount: 0,
+  orderId: null,
 };
 
 export const orderSlice = createSlice({
   name: 'order',
   initialState,
   reducers: {
+    setOrderId(state, action: PayloadAction<number>) {
+      state.orderId = action.payload;
+    },
+
     addItemToOrder(state, action: PayloadAction<ProductItem>) {
       const product = action.payload;
       const productItem = state.items.find(
@@ -101,6 +107,7 @@ export const orderSlice = createSlice({
 });
 
 export const {
+  setOrderId,
   addItemToOrder,
   removeItemFromOrder,
   deleteItemFromOrder,

@@ -11,12 +11,17 @@ import {
   DISCOUNT_GET_ORDER_DISCOUNT,
   DISCOUNT_IMPORT,
   DISCOUNT_UPDATE_OPEN_ORDER,
+  MENU_ADD_PRODUCT_TO_CURRENT_COUNT,
+  MENU_CLOSE_ORDER_IN_CURRENT_COUNT,
   MENU_GET_ALL_PRODUCTS,
   MENU_GET_CATEGORIES,
+  MENU_GET_CURRENT_COUNTS,
   MENU_GET_PRODUCT_BY_ID,
   MENU_GET_PRODUCTS_BY_CATEGORY,
   MENU_IMPORT_CATEGORIES,
   MENU_IMPORT_PRODUCTS,
+  MENU_RECALCULATE_STOCK,
+  MENU_UPDATE_ORDER_ID_IN_CURRENT_COUNT,
   OPEN_ROUTE,
   ORDER_CLOSE,
   ORDER_GET_OPEN,
@@ -39,9 +44,13 @@ import {
   updateOpenOrderClient,
 } from './services/clients.service';
 import {
+  addProductToCurrentCount,
+  closeOrderInCurrentCount,
   getAllProducts,
   importCategories,
   importProducts,
+  recalculateStock,
+  updateOrderIdInCurrentCount,
 } from './services/menu.service';
 import { KitchenTicket, PreCheck } from '../renderer/types/Print';
 import { printCheck, printKitchenTicket } from './services/print.service';
@@ -97,6 +106,24 @@ const electronHandler = {
   getAllProducts: () => ipcRenderer.invoke(MENU_GET_ALL_PRODUCTS),
   getProductById: (id: number) =>
     ipcRenderer.invoke(MENU_GET_PRODUCT_BY_ID, id),
+  addProductToCurrentCount: (
+    productId: number,
+    tableId: number,
+    orderId?: number,
+  ) =>
+    ipcRenderer.invoke(
+      MENU_ADD_PRODUCT_TO_CURRENT_COUNT,
+      productId,
+      tableId,
+      orderId,
+    ),
+  updateOrderIdInCurrentCount: (tableId: number, orderId: number) =>
+    ipcRenderer.invoke(MENU_UPDATE_ORDER_ID_IN_CURRENT_COUNT, tableId, orderId),
+  recalculateStock: () => ipcRenderer.invoke(MENU_RECALCULATE_STOCK),
+  closeOrderInCurrentCount: (orderId: number, tableId: number) =>
+    ipcRenderer.invoke(MENU_CLOSE_ORDER_IN_CURRENT_COUNT, orderId, tableId),
+  getCurrentCounts: () => ipcRenderer.invoke(MENU_GET_CURRENT_COUNTS),
+
   getClients: () => ipcRenderer.invoke(CLIENTS_GET),
   getClientById: (clientId: number) =>
     ipcRenderer.invoke(CLIENTS_GET_BY_ID, clientId),

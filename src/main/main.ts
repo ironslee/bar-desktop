@@ -25,12 +25,17 @@ import {
   DISCOUNT_GET_ORDER_DISCOUNT,
   DISCOUNT_IMPORT,
   DISCOUNT_UPDATE_OPEN_ORDER,
+  MENU_ADD_PRODUCT_TO_CURRENT_COUNT,
+  MENU_CLOSE_ORDER_IN_CURRENT_COUNT,
   MENU_GET_ALL_PRODUCTS,
   MENU_GET_CATEGORIES,
+  MENU_GET_CURRENT_COUNTS,
   MENU_GET_PRODUCT_BY_ID,
   MENU_GET_PRODUCTS_BY_CATEGORY,
   MENU_IMPORT_CATEGORIES,
   MENU_IMPORT_PRODUCTS,
+  MENU_RECALCULATE_STOCK,
+  MENU_UPDATE_ORDER_ID_IN_CURRENT_COUNT,
   OPEN_ROUTE,
   ORDER_CLOSE,
   ORDER_GET_OPEN,
@@ -55,12 +60,17 @@ import {
   updateOpenOrderUser,
 } from './services/users.service';
 import {
+  addProductToCurrentCount,
+  closeOrderInCurrentCount,
   getAllProducts,
   getCategories,
+  getCurrentCounts,
   getProductById,
   getProductsByCategory,
   importCategories,
   importProducts,
+  recalculateStock,
+  updateOrderIdInCurrentCount,
 } from './services/menu.service';
 import {
   getClientById,
@@ -245,6 +255,30 @@ app
     });
     ipcMain.handle(MENU_IMPORT_PRODUCTS, async (_) => {
       return importProducts();
+    });
+    ipcMain.handle(
+      MENU_ADD_PRODUCT_TO_CURRENT_COUNT,
+      async (_, productId: number, tableId: number, orderId?: number) => {
+        return addProductToCurrentCount(productId, tableId, orderId);
+      },
+    );
+    ipcMain.handle(
+      MENU_UPDATE_ORDER_ID_IN_CURRENT_COUNT,
+      async (_, tableId: number, orderId: number) => {
+        return updateOrderIdInCurrentCount(tableId, orderId);
+      },
+    );
+    ipcMain.handle(MENU_RECALCULATE_STOCK, async (_) => {
+      return recalculateStock();
+    });
+    ipcMain.handle(
+      MENU_CLOSE_ORDER_IN_CURRENT_COUNT,
+      async (_, orderId: number, tableId: number) => {
+        return closeOrderInCurrentCount(orderId, tableId);
+      },
+    );
+    ipcMain.handle(MENU_GET_CURRENT_COUNTS, async (_) => {
+      return getCurrentCounts();
     });
 
     // Clients

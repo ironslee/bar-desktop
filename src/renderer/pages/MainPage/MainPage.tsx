@@ -146,6 +146,7 @@ const MainPage = () => {
               // Dispatch every order
               dispatch(
                 syncTableOrder({
+                  orderId: order.id,
                   tableId: order.table_id,
                   orderItems,
                   orderClient,
@@ -158,6 +159,7 @@ const MainPage = () => {
           );
 
           await Promise.all(orderPromises);
+          console.log('openOrders', openOrders);
         }
       } catch (error) {
         message.error('Ошибка при получении открытых заказов');
@@ -192,7 +194,7 @@ const MainPage = () => {
 
   if (showSynchro && tokens.access_token !== '' && tokens.access_token) {
     console.log('asd', tokens);
-    return <Synchro />;
+    // return <Synchro />;
   }
 
   return (

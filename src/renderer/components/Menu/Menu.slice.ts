@@ -1,17 +1,19 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { CategoryItem } from '../../types/Category';
-import { ProductItem } from '../../types/Product';
+import { CurrentCount, ProductItem } from '../../types/Product';
 
 interface MenuState {
   categories: CategoryItem[];
   products: ProductItem[];
   selectedCategory: CategoryItem | null;
+  currentCounts: CurrentCount[];
 }
 
 const initialState: MenuState = {
   categories: [],
   products: [],
   selectedCategory: null,
+  currentCounts: [],
 };
 
 export const menuSlice = createSlice({
@@ -28,6 +30,9 @@ export const menuSlice = createSlice({
       const categoryId = action.payload;
       state.selectedCategory =
         state.categories.find((category) => category.id === categoryId) || null;
+    },
+    setCurrentCounts(state, action: PayloadAction<CurrentCount[]>) {
+      state.currentCounts = action.payload;
     },
   },
 });
