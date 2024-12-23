@@ -193,13 +193,13 @@ const Payment = ({
           //   items: response.items,
           // };
           console.log('DATA', data);
-          // if (await isInternetAvailable()) {
-          //   const res = await api.post(`/desktop/orders`, data);
-          //   await window.electron.setUploadedOrderById(response.id);
-          //   if (res) {
-          //     console.log('imported1');
-          //   }
-          // }
+          if (await isInternetAvailable()) {
+            const res = await api.post(`/desktop/orders`, data);
+            await window.electron.setUploadedOrderById(response.id);
+            if (res) {
+              console.log('imported1');
+            }
+          }
           await message.success('Оплата успешно завершена!');
           // onChangeModal();
           // window.location.href = '/';

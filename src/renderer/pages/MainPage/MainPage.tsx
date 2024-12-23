@@ -51,6 +51,10 @@ const MainPage = () => {
     setIsUsersOpen(!isUsersOpen);
   };
 
+  const clearTempCounts = async () => {
+    await window.electron.clearTemporaryCounts();
+  };
+
   useEffect(() => {
     if (tokens.access_token) {
       console.log('ww', tokens);
@@ -71,6 +75,7 @@ const MainPage = () => {
       if (parsedTokens) {
         dispatch(setTokens(parsedTokens));
       }
+      clearTempCounts();
     } catch (error) {
       console.log(error);
     }

@@ -215,15 +215,34 @@ const Order = (): JSX.Element => {
     )?.product;
     if (product) {
       if (product.stock !== null && tableId) {
-        const success = window.electron.addProductToCurrentCount(
-          product.id,
-          tableId,
-        );
-        if (await success) {
-          dispatch(addItemToOrder(product));
+        if (orderIdFromStore !== null) {
+          const success = window.electron.addProductToCurrentCount(
+            product.id,
+            tableId,
+            orderIdFromStore,
+          );
+          if (await success) {
+            dispatch(addItemToOrder(product));
+          } else {
+            message.error('Ошибка добавления продукта в заказ.');
+          }
         } else {
-          message.error('Ошибка добавления продукта в заказ.');
+          const success = window.electron.addProductToCurrentCount(
+            product.id,
+            tableId,
+          );
+          if (await success) {
+            dispatch(addItemToOrder(product));
+          } else {
+            message.error('Ошибка добавления продукта в заказ.');
+          }
         }
+
+        // if (await success) {
+        //   dispatch(addItemToOrder(product));
+        // } else {
+        //   message.error('Ошибка добавления продукта в заказ.');
+        // }
       } else {
         dispatch(addItemToOrder(product));
       }
@@ -231,12 +250,52 @@ const Order = (): JSX.Element => {
     }
   };
 
-  const handleRemove = (productId: number) => {
-    dispatch(removeItemFromOrder(productId));
+  const handleRemove = async (productId: number) => {
+    const product = items.find(
+      (item: OrderItem) => item.product.id === productId,
+    )?.product;
+    if (product) {
+      if (product.stock !== null && tableId) {
+        const success = window.electron.decreaseProductInCurrentCount(
+          product.id,
+          tableId,
+        );
+        if (await success) {
+          // dispatch(addItemToOrder(product));
+          dispatch(removeItemFromOrder(productId));
+        } else {
+          message.error('Ошибка удаления продукта из заказа.');
+        }
+      } else {
+        // dispatch(addItemToOrder(product));
+        dispatch(removeItemFromOrder(productId));
+      }
+      // dispatch(addItemToOrder(product));
+    }
+    // dispatch(removeItemFromOrder(productId));
   };
 
-  const handleDelete = (productId: number) => {
-    dispatch(deleteItemFromOrder(productId));
+  const handleDelete = async (productId: number) => {
+    const product = items.find(
+      (item: OrderItem) => item.product.id === productId,
+    )?.product;
+    if (product) {
+      if (product.stock !== null && tableId) {
+        const success = window.electron.deleteProductFromCurrentCount(
+          product.id,
+          tableId,
+        );
+        if (await success) {
+          dispatch(deleteItemFromOrder(productId));
+        } else {
+          message.error('Ошибка удаления продукта из заказа.');
+        }
+      } else {
+        dispatch(deleteItemFromOrder(productId));
+      }
+      // dispatch(addItemToOrder(product));
+    }
+    // dispatch(deleteItemFromOrder(productId));
   };
 
   const onChangePaymentModal = () => {
