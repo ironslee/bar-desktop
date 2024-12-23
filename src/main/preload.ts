@@ -12,7 +12,10 @@ import {
   DISCOUNT_IMPORT,
   DISCOUNT_UPDATE_OPEN_ORDER,
   MENU_ADD_PRODUCT_TO_CURRENT_COUNT,
+  MENU_CLEAR_TEMPORARY_COUNTS,
   MENU_CLOSE_ORDER_IN_CURRENT_COUNT,
+  MENU_DECREASE_PRODUCT_IN_CURRENT_COUNT,
+  MENU_DELETE_PRODUCT_FROM_CURRENT_COUNT,
   MENU_GET_ALL_PRODUCTS,
   MENU_GET_CATEGORIES,
   MENU_GET_CURRENT_COUNTS,
@@ -46,6 +49,8 @@ import {
 import {
   addProductToCurrentCount,
   closeOrderInCurrentCount,
+  decreaseProductInCurrentCount,
+  deleteProductFromCurrentCount,
   getAllProducts,
   importCategories,
   importProducts,
@@ -119,10 +124,33 @@ const electronHandler = {
     ),
   updateOrderIdInCurrentCount: (tableId: number, orderId: number) =>
     ipcRenderer.invoke(MENU_UPDATE_ORDER_ID_IN_CURRENT_COUNT, tableId, orderId),
+  decreaseProductInCurrentCount: (
+    productId: number,
+    tableId: number,
+    orderId?: number,
+  ) =>
+    ipcRenderer.invoke(
+      MENU_DECREASE_PRODUCT_IN_CURRENT_COUNT,
+      productId,
+      tableId,
+      orderId,
+    ),
+  deleteProductFromCurrentCount: (
+    productId: number,
+    tableId: number,
+    orderId?: number,
+  ) =>
+    ipcRenderer.invoke(
+      MENU_DELETE_PRODUCT_FROM_CURRENT_COUNT,
+      productId,
+      tableId,
+      orderId,
+    ),
   recalculateStock: () => ipcRenderer.invoke(MENU_RECALCULATE_STOCK),
   closeOrderInCurrentCount: (orderId: number, tableId: number) =>
     ipcRenderer.invoke(MENU_CLOSE_ORDER_IN_CURRENT_COUNT, orderId, tableId),
   getCurrentCounts: () => ipcRenderer.invoke(MENU_GET_CURRENT_COUNTS),
+  clearTemporaryCounts: () => ipcRenderer.invoke(MENU_CLEAR_TEMPORARY_COUNTS),
 
   getClients: () => ipcRenderer.invoke(CLIENTS_GET),
   getClientById: (clientId: number) =>

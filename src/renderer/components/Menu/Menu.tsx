@@ -75,12 +75,23 @@ const Menu = (): JSX.Element => {
     fetchCurrentCounts(); // Вызываем функцию
   }, [tableOrderItems]);
 
-  const adaptProducts = (productsArr: any[]) => {
-    return productsArr.map((product) => ({
-      ...product,
-      stock: product.stock === null ? null : Math.max(0, product.stock),
-      isDisabled: product.stock !== null && product.stock <= 0,
-    }));
+  useEffect(() => {
+    // eslint-disable-next-line no-use-before-define
+    downloadProductsCsv();
+  }, []);
+
+  const downloadProductsCsv = async () => {
+    try {
+      console.log('importProducts started');
+      const res = await window.electron.importProducts();
+      console.log('importProducts success', res);
+
+      return res;
+    } catch (error: any) {
+      console.log(error);
+
+      return false;
+    }
   };
 
   // Запрос продуктов при выборе категории

@@ -226,45 +226,7 @@ const updateProducts = (products: ProductItem[]) => {
   }
 };
 
-// const addToOrder = (productId: number, quantity: number) => {
-//   try {
-//     const db = connect();
-
-//     const product = db
-//       .prepare(`
-//         SELECT stock, count_in_orders
-//         FROM products
-//         WHERE id = ?
-//       `)
-//       .get(productId);
-
-//     if (!product) {
-//       throw new Error('Продукт не найден');
-//     }
-
-//     const stock = product.stock;
-//     const countInOrders = product.count_in_orders;
-
-//     if (stock - (countInOrders + quantity) < 0) {
-//       throw new Error('Недостаточно остатка для добавления блюда.');
-//     }
-
-//     const update = db.prepare(`
-//       UPDATE products
-//       SET count_in_orders = count_in_orders + ?
-//       WHERE id = ?
-//     `);
-
-//     update.run(quantity, productId);
-
-//     db.close();
-
-//     return true;
-//   } catch (error) {
-//     console.log(error);
-//     return false;
-//   }
-// };
+// ----------Count services------------------
 
 export const addProductToCurrentCount = (
   productId: number,
@@ -329,44 +291,89 @@ export const updateOrderIdInCurrentCount = (
   return true;
 };
 
-// export const addProductToCurrentCount = (
-//   productId: number,
-//   orderId?: number,
-// ) => {
-//   const db = connect();
+export const decreaseProductInCurrentCount = (
+  productId: number,
+  tableId: number,
+  orderId?: number,
+) => {
+  const db = connect();
 
-//   // Foreign key verification off
-//   db.prepare('PRAGMA foreign_keys = OFF;').run();
+  db.prepare('PRAGMA foreign_keys = OFF;').run();
 
-//   const check = db.prepare(`
-//     SELECT * FROM current_count
-//     WHERE product_id = @productId AND (order_id = @orderId OR order_id IS NULL) AND order_status = 'open';
-//   `);
-//   const existingRecord = check.get({ productId, orderId });
+  // Проверяем существующую запись
+  const check = db.prepare(`
+    SELECT * FROM current_count
+    WHERE product_id = @productId
+      AND (order_id = @orderId OR (order_id IS NULL AND table_id = @tableId))
+      AND order_status = 'open';
+  `);
+  const existingRecord: CurrentCount = check.get({
+    productId,
+    orderId,
+    tableId,
+  }) as CurrentCount;
 
-//   if (existingRecord) {
-//     // Increment count
-//     const update = db.prepare(`
-//       UPDATE current_count
-//       SET count = count + 1
-//       WHERE product_id = @productId AND (order_id = @orderId OR order_id IS NULL) AND order_status = 'open';
-//     `);
-//     update.run({ productId, orderId });
-//   } else {
-//     // Insert new record with orderId or NULL
-//     const insert = db.prepare(`
-//       INSERT INTO current_count (product_id, order_id, count, order_status)
-//       VALUES (@productId, @orderId, 1, 'open');
-//     `);
-//     insert.run({ productId, orderId: orderId ?? null });
-//   }
+  if (existingRecord) {
+    if (existingRecord.count > 1) {
+      // Уменьшаем счётчик count
+      const update = db.prepare(`
+        UPDATE current_count
+        SET count = count - 1
+        WHERE product_id = @productId
+          AND (order_id = @orderId OR (order_id IS NULL AND table_id = @tableId))
+          AND order_status = 'open';
+      `);
+      update.run({ productId, orderId, tableId });
+    } else {
+      // Удаляем запись, если count становится равным 0
+      const remove = db.prepare(`
+        DELETE FROM current_count
+        WHERE product_id = @productId
+          AND (order_id = @orderId OR (order_id IS NULL AND table_id = @tableId))
+          AND order_status = 'open';
+      `);
+      remove.run({ productId, orderId, tableId });
+    }
+  }
 
-//   // Foreign key verification on
-//   db.prepare('PRAGMA foreign_keys = ON;').run();
+  db.prepare('PRAGMA foreign_keys = ON;').run();
+  db.close();
+  return true;
+};
 
-//   db.close();
-//   return true;
-// };
+export const deleteProductFromCurrentCount = (
+  productId: number,
+  tableId: number,
+  orderId?: number,
+) => {
+  const db = connect();
+
+  db.prepare('PRAGMA foreign_keys = OFF;').run();
+
+  // Проверяем существующую запись
+  const check = db.prepare(`
+    SELECT * FROM current_count
+    WHERE product_id = @productId
+      AND (order_id = @orderId OR (order_id IS NULL AND table_id = @tableId))
+      AND order_status = 'open';
+  `);
+  const existingRecord = check.get({ productId, orderId, tableId });
+
+  if (existingRecord) {
+    // Удаляем запись
+    const remove = db.prepare(`
+      DELETE FROM current_count
+      WHERE product_id = @productId
+        AND (order_id = @orderId OR (order_id IS NULL AND table_id = @tableId))
+        AND order_status = 'open';
+    `);
+    remove.run({ productId, orderId, tableId });
+  }
+
+  db.prepare('PRAGMA foreign_keys = ON;').run();
+  db.close();
+  return true;
+};
 
 export const recalculateStock = () => {
   try {
@@ -443,4 +450,14 @@ export const getCurrentCounts = () => {
     console.error('Ошибка при получении currentCounts:', error);
     return [];
   }
+};
+
+export const clearTemporaryCounts = () => {
+  const db = connect();
+
+  db.prepare(`
+    DELETE FROM current_count WHERE order_id IS NULL;
+  `).run();
+
+  db.close();
 };

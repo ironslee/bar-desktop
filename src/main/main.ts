@@ -26,7 +26,10 @@ import {
   DISCOUNT_IMPORT,
   DISCOUNT_UPDATE_OPEN_ORDER,
   MENU_ADD_PRODUCT_TO_CURRENT_COUNT,
+  MENU_CLEAR_TEMPORARY_COUNTS,
   MENU_CLOSE_ORDER_IN_CURRENT_COUNT,
+  MENU_DECREASE_PRODUCT_IN_CURRENT_COUNT,
+  MENU_DELETE_PRODUCT_FROM_CURRENT_COUNT,
   MENU_GET_ALL_PRODUCTS,
   MENU_GET_CATEGORIES,
   MENU_GET_CURRENT_COUNTS,
@@ -61,7 +64,10 @@ import {
 } from './services/users.service';
 import {
   addProductToCurrentCount,
+  clearTemporaryCounts,
   closeOrderInCurrentCount,
+  decreaseProductInCurrentCount,
+  deleteProductFromCurrentCount,
   getAllProducts,
   getCategories,
   getCurrentCounts,
@@ -268,6 +274,18 @@ app
         return updateOrderIdInCurrentCount(tableId, orderId);
       },
     );
+    ipcMain.handle(
+      MENU_DECREASE_PRODUCT_IN_CURRENT_COUNT,
+      async (_, productId: number, tableId: number, orderId?: number) => {
+        return decreaseProductInCurrentCount(productId, tableId, orderId);
+      },
+    );
+    ipcMain.handle(
+      MENU_DELETE_PRODUCT_FROM_CURRENT_COUNT,
+      async (_, productId: number, tableId: number, orderId?: number) => {
+        return deleteProductFromCurrentCount(productId, tableId, orderId);
+      },
+    );
     ipcMain.handle(MENU_RECALCULATE_STOCK, async (_) => {
       return recalculateStock();
     });
@@ -279,6 +297,9 @@ app
     );
     ipcMain.handle(MENU_GET_CURRENT_COUNTS, async (_) => {
       return getCurrentCounts();
+    });
+    ipcMain.handle(MENU_CLEAR_TEMPORARY_COUNTS, async (_) => {
+      return clearTemporaryCounts();
     });
 
     // Clients
