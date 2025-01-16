@@ -13,9 +13,9 @@
   ],
   "license": "MIT",
   "author": {
-    "name": "nadeocfg",
-    "email": "nadeocfg@gmail.com",
-    "url": "https://github.com/nadeocfg"
+    "name": "ironslee",
+    "email": "irsimlee@gmail.com",
+    "url": "https://github.com/ironslee"
   },
   "contributors": [],
   "main": "./src/main/main.ts",

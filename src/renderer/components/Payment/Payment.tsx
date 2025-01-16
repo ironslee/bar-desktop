@@ -82,7 +82,7 @@ const Payment = ({
 
   // eslint-disable-next-line consistent-return
   const isInternetAvailable = async (
-    url: string = `http://91.147.93.105:8000/desktop/orders/latest
+    url: string = `.../desktop/orders/latest
 `,
     // eslint-disable-next-line consistent-return
   ) => {

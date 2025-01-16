@@ -51,7 +51,4 @@ export const OPEN_ROUTE = 'openRoute';
 // export const PRINT_RECEIPT = 'print:receipt';
 // export const APP_ID = 'app:id';
 
-export const apiUrl =
-  process?.env?.NODE_ENV === 'development'
-    ? 'http://91.147.93.105:8000'
-    : 'http://91.147.93.105:8000';
+export const apiUrl = process?.env?.NODE_ENV === 'development' ? '' : '';
